@@ -2,6 +2,9 @@
 engines:
   csslint:
     enabled: true
+    checks:
+      order-alphabetical:
+        enabled: false
   eslint:
     enabled: true
   fixme:
@@ -10,6 +13,8 @@ engines:
     enabled: true
     checks:
       Controversial/CamelCaseParameterName:
+        enabled: false
+      Controversial/CamelCasePropertyName:
         enabled: false
       Naming/LongVariable:
         enabled: false
