@@ -1,0 +1,35 @@
+version: "2"
+plugins:
+  csslint:
+    enabled: true
+    checks:
+      order-alphabetical:
+        enabled: false
+  eslint:
+    enabled: true
+  fixme:
+    enabled: true
+  phpmd:
+    enabled: true
+    checks:
+      Controversial/CamelCaseParameterName:
+        enabled: false
+      Controversial/CamelCasePropertyName:
+        enabled: false
+      Naming/LongVariable:
+        enabled: false
+      Naming/ShortVariable:
+        enabled: false
+      order-alphabetical:
+        enabled: false
+ratings:
+  paths:
+  - "**.css"
+  - "**.js"
+  - "**.php"
+exclude_patterns:
+- "api_explorer/*"
+- "build/*"
+- "client/css/converse.css"
+- "client/js/libs/*"
+- "server/php/libs/vendors/**/*"
