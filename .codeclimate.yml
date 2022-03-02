@@ -22,11 +22,6 @@ plugins:
         enabled: false
       order-alphabetical:
         enabled: false
-ratings:
-  paths:
-  - "**.css"
-  - "**.js"
-  - "**.php"
 exclude_patterns:
 - "api_explorer/*"
 - "build/*"
