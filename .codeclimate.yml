@@ -5,6 +5,8 @@ plugins:
     checks:
       order-alphabetical:
         enabled: false
+      outline-none:
+        enabled: false
   eslint:
     enabled: true
   fixme:
@@ -15,6 +17,8 @@ plugins:
       Controversial/CamelCaseParameterName:
         enabled: false
       Controversial/CamelCasePropertyName:
+        enabled: false
+      Controversial/CamelCaseVariableName:
         enabled: false
       Naming/LongVariable:
         enabled: false
