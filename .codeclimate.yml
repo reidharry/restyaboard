@@ -1,5 +1,5 @@
 ---
-engines:
+plugins:
   csslint:
     enabled: true
     checks:
@@ -27,7 +27,7 @@ ratings:
   - "**.css"
   - "**.js"
   - "**.php"
-exclude_paths:
+exclude_patterns:
 - api_explorer/*
 - build/*
 - client/css/converse.css
