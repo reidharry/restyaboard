@@ -1,4 +1,4 @@
----
+version: "2"
 plugins:
   csslint:
     enabled: true
@@ -28,8 +28,8 @@ ratings:
   - "**.js"
   - "**.php"
 exclude_patterns:
-- api_explorer/*
-- build/*
-- client/css/converse.css
-- client/js/libs/*
-- server/php/libs/vendors/**/*
+- "api_explorer/*"
+- "build/*"
+- "client/css/converse.css"
+- "client/js/libs/*"
+- "server/php/libs/vendors/**/*"
