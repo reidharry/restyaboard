@@ -18,7 +18,7 @@ plugins:
         enabled: false
       Controversial/CamelCasePropertyName:
         enabled: false
-      Controversial/CamelCaseVariableName
+      Controversial/CamelCaseVariableName:
         enabled: false
       Naming/LongVariable:
         enabled: false
