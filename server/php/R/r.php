@@ -4716,6 +4716,7 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
             $r_post = json_decode($_POST['data'], true);
             $r_post['image_link'] = $_POST['image_link'];
         }
+        $response_file = array();
         $table_name = 'cards';
         if (!empty($r_post['is_support_app'])) {
             $admin = executeQuery('SELECT id FROM users WHERE role_id = $1', [1]);
@@ -4829,9 +4830,9 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                                         $response_file['activity'] = insertActivity($userID, $comment, 'add_card_attachment', $foreign_ids, null, $response_file['card_attachments'][$i]['id']);
                                         foreach ($thumbsizes['CardAttachment'] as $key => $value) {
                                             $imgdir = IMG_PATH . DS . $key . DS . 'CardAttachment' . DS . $response_file['card_attachments'][$i]['id'];
-                                            $list = glob($imgdir . '.*');
-                                            if (!empty($list) && isset($list[0]) && file_exists($list[0])) {
-                                                unlink($list[0]);
+                                            $imageList = glob($imgdir . '.*');
+                                            if (!empty($imageList) && isset($imageList[0]) && file_exists($imageList[0])) {
+                                                unlink($imageList[0]);
                                             }
                                         }
                                     }
@@ -4880,9 +4881,9 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                                 $response_file['activity'] = insertActivity($userID, $comment, 'add_card_attachment', $foreign_ids, null, $row['id']);
                                 foreach ($thumbsizes['CardAttachment'] as $key => $value) {
                                     $mediadir = IMG_PATH . DS . $key . DS . 'CardAttachment' . DS . $row['id'];
-                                    $list = glob($mediadir . '.*');
-                                    if (!empty($list) && isset($list[0]) && file_exists($list[0])) {
-                                        unlink($list[0]);
+                                    $imageList = glob($mediadir . '.*');
+                                    if (!empty($imageList) && isset($imageList[0]) && file_exists($imageList[0])) {
+                                        unlink($imageList[0]);
                                     }
                                 }
                             }
@@ -6736,12 +6737,12 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
             if (!empty($table_name)) {
                 $passed_values['table_name'] = $table_name;
             }
-            if (!empty($siteCurrencyCode)) {
+            /* if (!empty($siteCurrencyCode)) {
                 $passed_values['siteCurrencyCode'] = $siteCurrencyCode;
-            }
-            if (!empty($enabledPlugins)) {
+            } */
+            /* if (!empty($enabledPlugins)) {
                 $passed_values['enabledPlugins'] = $enabledPlugins;
-            }
+            } */
             $plugin_return = call_user_func($plugin_key . '_r_post', $passed_values);
             echo json_encode($plugin_return);
             break;
@@ -6882,6 +6883,7 @@ function r_put($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_put)
 
     case '/labels/?': //labels update
         $json = true;
+        $label_id = array();
         $table_name = 'labels';
         $id = $r_resource_vars['labels'];
         $response['success'] = 'Label has been updated successfully.';
@@ -6925,6 +6927,7 @@ function r_put($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_put)
 
     case '/boards/?':
         $table_name = 'boards';
+        $board = array();
         $id = $r_resource_vars['boards'];
         $qry_val_arr = array(
             $r_resource_vars['boards']
@@ -7990,12 +7993,12 @@ function r_put($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_put)
             if (!empty($table_name)) {
                 $passed_values['table_name'] = $table_name;
             }
-            if (!empty($siteCurrencyCode)) {
+            /* if (!empty($siteCurrencyCode)) {
                 $passed_values['siteCurrencyCode'] = $siteCurrencyCode;
-            }
-            if (!empty($enabledPlugins)) {
+            } */
+            /* if (!empty($enabledPlugins)) {
                 $passed_values['enabledPlugins'] = $enabledPlugins;
-            }
+            } */
             $plugin_return = call_user_func($plugin_key . '_r_put', $passed_values);
             echo json_encode($plugin_return);
             break;
@@ -8462,12 +8465,12 @@ function r_delete($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             if (!empty($table_name)) {
                 $passed_values['table_name'] = $table_name;
             }
-            if (!empty($siteCurrencyCode)) {
+            /* if (!empty($siteCurrencyCode)) {
                 $passed_values['siteCurrencyCode'] = $siteCurrencyCode;
-            }
-            if (!empty($enabledPlugins)) {
+            } */
+            /* if (!empty($enabledPlugins)) {
                 $passed_values['enabledPlugins'] = $enabledPlugins;
-            }
+            } */
             $plugin_return = call_user_func($plugin_key . '_r_delete', $passed_values);
             echo json_encode($plugin_return);
             exit;
