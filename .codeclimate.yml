@@ -21,6 +21,8 @@ plugins:
   phpmd:
     enabled: true
     checks:
+      CleanCode/MissingImport:
+        enabled: false
       Controversial/CamelCaseMethodName:
         enabled: false
       Controversial/CamelCaseParameterName:
