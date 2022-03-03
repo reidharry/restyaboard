@@ -26,6 +26,8 @@ plugins:
         enabled: false
       Controversial/CamelCaseVariableName:
         enabled: false
+      Controversial/Superglobals:
+        enabled: false
       Naming/LongVariable:
         enabled: false
       Naming/ShortVariable:
