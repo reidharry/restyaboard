@@ -1,4 +1,8 @@
 version: "2"
+checks:
+  file-lines:
+    config:
+      threshold: 10000
 plugins:
   csslint:
     enabled: true
@@ -28,11 +32,6 @@ plugins:
         enabled: false
       order-alphabetical:
         enabled: false
-ratings:
-  paths:
-  - "**.css"
-  - "**.js"
-  - "**.php"
 exclude_patterns:
 - "api_explorer/*"
 - "build/*"
