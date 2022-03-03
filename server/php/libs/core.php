@@ -1146,7 +1146,7 @@ function createTrelloMember($member = array() , $admin_user_id = array() , $new_
 function importTrelloBoard($board = array())
 {
     global $r_debug, $db_lnk, $authUser, $_server_domain_url;
-    $users = $lists = $cards = $cardLists = $listNames = array();
+    $users = $lists = $cards = $cardLists = $listNames = $customFieldOptions = $customFields = array();
     if (!empty($board)) {
         $user_id = $authUser['id'];
         $board_visibility = 0;
@@ -1718,7 +1718,7 @@ function importTrelloBoard($board = array())
 function importKantreeBoard($jsonArr = array())
 {
     global $r_debug, $db_lnk, $authUser, $_server_domain_url;
-    $users = $userNames = $lists = $listNames = $cards = $cardLists = $labels = array();
+    $users = $userNames = $lists = $listNames = $cards = $cardLists = $labels = $board = $custom_fields = $memberNames = array();
     if (!empty($jsonArr)) {
         foreach ($jsonArr as $json) {
             if (!empty($json['board_created'])) {
@@ -2997,7 +2997,7 @@ function importAsanaBoard($jsonArr = array())
 function importTaskWarriorBoard($jsonArr = array())
 {
     global $r_debug, $db_lnk, $authUser, $_server_domain_url;
-    $users = $userNames = $lists = $cards = $labels = array();
+    $lists = $cards = $labels = $board = array();
     $board['lists'] = array(
         array(
             'gid' => 1,
@@ -3160,7 +3160,7 @@ function importTaskWarriorBoard($jsonArr = array())
 function importpipefyBoard($board = array())
 {
     global $r_debug, $db_lnk, $authUser, $_server_domain_url;
-    $users = $userNames = $lists = $listNames = $cards = $cardLists = $labels = array();
+    $users = $userNames = $lists = $listNames = $cards = $labels = $data = array();
     if (!empty($board)) {
         $user_id = $authUser['id'];
         foreach ($board as $key => $value) {
@@ -3924,6 +3924,7 @@ function convertBooleanValues($table, $row)
 function paginate_data($c_sql, $db_lnk, $pg_params, $r_resource_filters, $limit = PAGING_COUNT)
 {
     global $r_debug, $db_lnk, $authUser, $_server_domain_url;
+    $arr = array();
     $c_result = pg_query_params($db_lnk, $c_sql, $pg_params);
     $c_data = pg_fetch_object($c_result, 0);
     $page = (isset($r_resource_filters['page']) && $r_resource_filters['page']) ? $r_resource_filters['page'] : 1;
@@ -3952,7 +3953,7 @@ function paginate_data($c_sql, $db_lnk, $pg_params, $r_resource_filters, $limit 
 function update_query($table_name, $id, $r_resource_cmd, $r_put, $comment = '', $activity_type = '', $foreign_ids = '')
 {
     global $r_debug, $db_lnk, $authUser, $_server_domain_url;
-    $values = array();
+    $values = $diff = array();
     $sfields = '';
     $fields = '';
     if ($activity_type != 'delete_card_evergreen_card' && $activity_type != 'add_card_evergreen_card') {
@@ -4160,6 +4161,7 @@ function importMember($member, $new_board, $import_type)
         utf8_decode($member['username'])
     );
     global $r_debug, $db_lnk;
+    $users = array();
     $userExist = executeQuery('SELECT * FROM users WHERE username = $1', $qry_val_arr);
     if (!$userExist) {
         $default_email_notification = 0;
@@ -4651,6 +4653,7 @@ function sendMailNotification($notificationType)
                     $revisions = unserialize($activity['revisions']);
                     $activity['revisions'] = $revisions;
                     unset($dif);
+                    $dif = array();
                     if (!empty($revisions['new_value'])) {
                         foreach ($revisions['new_value'] as $key => $value) {
                             if ($key != 'is_archived' && $key != 'is_deleted' && $key != 'created' && $key != 'modified' && $key != 'is_offline' && $key != 'uuid' && $key != 'to_date' && $key != 'temp_id' && $activity['type'] != 'moved_card_checklist_item' && $activity['type'] != 'add_card_desc' && $activity['type'] != 'add_card_duedate' && $activity['type'] != 'delete_card_duedate' && $activity['type'] != 'add_background' && $activity['type'] != 'change_background' && $activity['type'] != 'change_visibility') {
@@ -4665,7 +4668,7 @@ function sendMailNotification($notificationType)
                     } else if (!empty($revisions['old_value']) && isset($activity['type']) && $activity['type'] == 'delete_card_comment') {
                         $dif[] = nl2br(getRevisiondifference($revisions['old_value'], ''));
                     }
-                    if (isset($dif)) {
+                    if (isset($dif) && !empty($dif)) {
                         $activity['difference'] = $dif;
                     }
                     if (!empty($activity['difference'][0])) {
@@ -4821,6 +4824,7 @@ function sendMailNotification($notificationType)
                     $revisions = unserialize($activity['revisions']);
                     $activity['revisions'] = $revisions;
                     unset($dif);
+                    $dif = array();
                     if (!empty($revisions['new_value'])) {
                         foreach ($revisions['new_value'] as $key => $value) {
                             if ($key != 'is_archived' && $key != 'is_deleted' && $key != 'created' && $key != 'modified' && $key != 'is_offline' && $key != 'uuid' && $key != 'to_date' && $key != 'temp_id' && $activity['type'] != 'moved_card_checklist_item' && $activity['type'] != 'add_card_desc' && $activity['type'] != 'add_card_duedate' && $activity['type'] != 'delete_card_duedate' && $activity['type'] != 'add_background' && $activity['type'] != 'change_background' && $activity['type'] != 'change_visibility') {
@@ -4835,7 +4839,7 @@ function sendMailNotification($notificationType)
                     } else if (!empty($revisions['old_value']) && isset($activity['type']) && $activity['type'] == 'delete_card_comment') {
                         $dif[] = nl2br(getRevisiondifference($revisions['old_value'], ''));
                     }
-                    if (isset($dif)) {
+                    if (isset($dif) && !empty($dif)) {
                         $activity['difference'] = $dif;
                     }
                     if (!empty($activity['difference'][0])) {
