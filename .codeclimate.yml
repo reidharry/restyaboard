@@ -1,8 +1,7 @@
 version: "2"
 checks:
   file-lines:
-    config:
-      threshold: 10000
+    enabled: false
 plugins:
   csslint:
     enabled: true
