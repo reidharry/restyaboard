@@ -14,6 +14,8 @@ plugins:
   phpmd:
     enabled: true
     checks:
+      Controversial/CamelCaseMethodName:
+        enabled: false
       Controversial/CamelCaseParameterName:
         enabled: false
       Controversial/CamelCasePropertyName:
