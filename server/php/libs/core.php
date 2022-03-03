@@ -364,7 +364,6 @@ function insertActivity($user_id, $comment, $type, $foreign_ids = array() , $rev
     $row = pg_fetch_assoc($result);
     $id_converted = base_convert($row['id'], 10, 36);
     $materialized_path = sprintf("%08s", $id_converted);
-    $freshness_ts = date('Y-m-d H:i:s');
     $path = 'P' . $row['id'];
     $depth = 0;
     $qry_val_arr = array(
@@ -643,7 +642,7 @@ function PushNotificationCurlExecute($url, $payload)
     $headers = array();
     $headers[] = 'Content-Type: application/x-www-form-urlencoded';
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    $result = curl_exec($ch);
+    curl_exec($ch);
     if (curl_errno($ch)) {
         echo 'Error:' . curl_error($ch);
     }
@@ -678,7 +677,6 @@ function sendPushNotification($user_id, $user_device_tokens = [], $profile_pictu
     $apns_push_message = array(
         "aps" => ["alert" => $comment],
     );
-    $andriod_device_tokens = array();
     $ios_device_tokens = array();
     $device_tokens = json_decode($user_device_tokens);
     foreach ($device_tokens as $value) {
@@ -2215,10 +2213,14 @@ function importTaigaBoard($board = array())
                 if (!empty($card['attachments'])) {
                     foreach ($card['attachments'] as $attachment) {
                         $mediadir = MEDIA_PATH . DS . 'Card' . DS . $_card['id'];
-                        $save_path = MEDIA_PATH . DS . 'Card' . DS . $_card['id'];
+                        if (!file_exists($mediadir)) {
+                            mkdir($mediadir, 0777, true);
+                        }
+                        $mediadir .= DS . $attachment['name'];
+                        $save_path = 'Card' . DS . $_card['id'];
                         $save_path = str_replace('\\', '/', $save_path);
                         $path = $save_path . DS . $attachment['name'];
-                        $fh = fopen($path, 'w');
+                        $fh = fopen($mediadir, 'w');
                         fwrite($fh, $attachment['attached_file']['data']);
                         fclose($fh);
                         $qry_val_arr = array(
