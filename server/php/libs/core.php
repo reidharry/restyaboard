@@ -2997,7 +2997,7 @@ function importAsanaBoard($jsonArr = array())
 function importTaskWarriorBoard($jsonArr = array())
 {
     global $r_debug, $db_lnk, $authUser, $_server_domain_url;
-    $users = $userNames = $lists = $cards = $labels = $board = array();
+    $lists = $cards = $labels = $board = array();
     $board['lists'] = array(
         array(
             'gid' => 1,
@@ -3160,7 +3160,7 @@ function importTaskWarriorBoard($jsonArr = array())
 function importpipefyBoard($board = array())
 {
     global $r_debug, $db_lnk, $authUser, $_server_domain_url;
-    $users = $userNames = $lists = $listNames = $cards = $cardLists = $labels = $data = array();
+    $users = $userNames = $lists = $listNames = $cards = $labels = $data = array();
     if (!empty($board)) {
         $user_id = $authUser['id'];
         foreach ($board as $key => $value) {
