@@ -4716,7 +4716,7 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
             $r_post = json_decode($_POST['data'], true);
             $r_post['image_link'] = $_POST['image_link'];
         }
-        $response_file = array();
+        $response_file = $obj = array();
         $table_name = 'cards';
         if (!empty($r_post['is_support_app'])) {
             $admin = executeQuery('SELECT id FROM users WHERE role_id = $1', [1]);
@@ -6734,9 +6734,9 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
             $passed_values['r_resource_filters'] = $r_resource_filters;
             $passed_values['authUser'] = $authUser;
             $passed_values['r_post'] = $r_post;
-            if (!empty($table_name)) {
+            /* if (!empty($table_name)) {
                 $passed_values['table_name'] = $table_name;
-            }
+            } */
             /* if (!empty($siteCurrencyCode)) {
                 $passed_values['siteCurrencyCode'] = $siteCurrencyCode;
             } */
@@ -7990,9 +7990,9 @@ function r_put($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_put)
             $passed_values['r_resource_filters'] = $r_resource_filters;
             $passed_values['authUser'] = $authUser;
             $passed_values['r_put'] = $r_put;
-            if (!empty($table_name)) {
+            /* if (!empty($table_name)) {
                 $passed_values['table_name'] = $table_name;
-            }
+            } */
             /* if (!empty($siteCurrencyCode)) {
                 $passed_values['siteCurrencyCode'] = $siteCurrencyCode;
             } */
@@ -8167,6 +8167,7 @@ function r_delete($r_resource_cmd, $r_resource_vars, $r_resource_filters)
         break;
 
     case '/boards/?/labels/?': // delete Labels in Filter
+        $label_id = array();
         $sql = 'DELETE FROM cards_labels WHERE board_id = $1 AND label_id = $2';
         array_push($pg_params, $r_resource_vars['boards'], $r_resource_vars['labels']);
         $comment = __l('##USER_NAME## removed label ##LABEL_NAME## on ##BOARD_NAME##');
@@ -8462,9 +8463,9 @@ function r_delete($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             $passed_values['r_resource_vars'] = $r_resource_vars;
             $passed_values['r_resource_filters'] = $r_resource_filters;
             $passed_values['authUser'] = $authUser;
-            if (!empty($table_name)) {
+            /* if (!empty($table_name)) {
                 $passed_values['table_name'] = $table_name;
-            }
+            } */
             /* if (!empty($siteCurrencyCode)) {
                 $passed_values['siteCurrencyCode'] = $siteCurrencyCode;
             } */
