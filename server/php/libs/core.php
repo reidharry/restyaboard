@@ -3371,7 +3371,7 @@ function importpipefyBoard($board = array())
 function importMondayBoards($path, $folder)
 {
     global $r_debug, $db_lnk, $authUser, $_server_domain_url;
-    $team_peoples = $boards = $card_updates = $sub_boards_names = $new_boards = array();
+    $team_peoples = $boards = $card_updates = $sub_boards_names = $new_boards = $custom_fields = $prev_root = $card_parent = array();
     // Reading team files for the peoples
     $team_filecount = 0;
     $teamfiles = glob($path . 'team' . DS . '*.xlsx');
@@ -3704,6 +3704,7 @@ function importMondayBoards($path, $folder)
                                     $depth = 0;
                                     $root = $activity['id'];
                                     $revisions = Null;
+                                    $revision = $prev_depth = array();
                                     if (!empty($cardComment['Parent Post ID']) && $cardComment['Content Type'] == 'Reply') {
                                         $path = 'P' . $card_parent[$cardComment['Parent Post ID']] . '.P' . $activity['id'];
                                         $materialized_path = $mat_path[$cardComment['Parent Post ID']] . '-' . $materialized_path;
@@ -4050,7 +4051,7 @@ function update_query($table_name, $id, $r_resource_cmd, $r_put, $comment = '', 
                         $new_val = (isset($revisions['new_value'])) ? $revisions['new_value'] : '';
                         $diff[] = nl2br(getRevisiondifference($old_val, $new_val));
                     }
-                } else if (!empty($revisions['old_value']) && isset($obj['type']) && $obj['type'] == 'delete_card_comment') {
+                } else if (!empty($revisions['old_value']) && isset($activity_type) && $activity_type == 'delete_card_comment') {
                     $diff[] = nl2br(getRevisiondifference($revisions['old_value'], ''));
                 }
             }
@@ -4319,6 +4320,7 @@ function __l($text)
 function sendMailNotification($notificationType)
 {
     global $r_debug, $db_lnk, $_server_domain_url;
+    $activity_id = array();
     $qry_val_arr = array(
         $notificationType
     );
