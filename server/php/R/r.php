@@ -63,8 +63,6 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
     // switch case.. if taking more length, then associative array...
     $query_timeout = 0;
     $sql = false;
-    $elastic_search_sql = false;
-    $parent_genre_name = '';
     $board_lists = array();
     $sort = 'id';
     $sort_by = 'DESC';
@@ -1729,7 +1727,6 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
         break;
 
     case '/boards/?/labels':
-        $metadata = array();
         $data = array();
         array_push($pg_params, $r_resource_vars['boards']);
         $sql = 'SELECT DISTINCT label_id, MAX(name) FROM  cards_labels_listing cll WHERE board_id = $1 GROUP BY label_id ORDER BY MAX(name) ASC';
@@ -2427,9 +2424,7 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
 function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
 {
     global $r_debug, $db_lnk, $authUser, $thumbsizes, $_server_domain_url, $jabberHost;
-    $emailFindReplace = $response = $foreign_id = $cards = $foreign_ids = $diff = $no_organization_users = $srow = $revisions = array();
-    $fields = 'created, modified';
-    $values = 'now(), now()';
+    $emailFindReplace = $response = $foreign_id = $cards = $foreign_ids = $diff = $srow = $revisions = array();
     $json = $sql = $is_return_vlaue = $is_import_board = $keepcards = false;
     $is_keep_attachment = $is_keep_user = $is_keep_label = $is_keep_activity = $is_keep_checklist = $copied_card_id = 0;
     $uuid = $table_name = '';
@@ -2476,7 +2471,7 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                 $conditions = array(
                     $user_id['user_id']
                 );
-                $users = pg_query_params($db_lnk, 'DELETE FROM users WHERE id= $1 RETURNING username', $conditions);
+                pg_query_params($db_lnk, 'DELETE FROM users WHERE id= $1 RETURNING username', $conditions);
             }
             $response = array(
                 'success' => 'Checked users are deleted successfully.'
@@ -3229,9 +3224,6 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                 $sfields = '';
                 foreach ($put as $key => $value) {
                     if ($key != 'is_send_newsletter') {
-                        if ($key != 'id') {
-                            $fields.= ', ' . $key;
-                        }
                         if ($key != 'id' && $key != 'position') {
                             $sfields.= (empty($sfields)) ? $key : ", " . $key;
                         }
@@ -5092,7 +5084,7 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                             $r_post['card_id'],
                             $user['id']
                         );
-                        $card_subscribed = executeQuery('DELETE FROM card_subscribers WHERE id = (SELECT id FROM card_subscribers WHERE card_id = $1 and user_id = $2)', $qry_val_arr);
+                        executeQuery('DELETE FROM card_subscribers WHERE id = (SELECT id FROM card_subscribers WHERE card_id = $1 and user_id = $2)', $qry_val_arr);
                         $qry_val_arr = array(
                             $r_post['card_id'],
                             $user['id'],
@@ -5607,7 +5599,6 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
         $label_names = pg_query_params($db_lnk, 'SELECT l.name FROM labels l inner join cards_labels cl on cl.label_id = l.id WHERE card_id = $1', $qry_val_arr);
         $delete_labels = pg_query_params($db_lnk, 'DELETE FROM ' . $table_name . ' WHERE card_id = $1 RETURNING label_id', $qry_val_arr);
         $delete_label = pg_fetch_assoc($delete_labels);
-        $delete_labels_count = pg_affected_rows($delete_labels);
         $names = '';
         if (!empty($r_post['name'])) {
             $label_names = explode(',', $r_post['name']);
@@ -6764,13 +6755,9 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
 function r_put($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_put)
 {
     global $r_debug, $db_lnk, $authUser, $thumbsizes, $_server_domain_url;
-    $fields = 'modified';
-    $values = array(
-        date('Y-m-d H:i:s')
-    );
-    $sfields = $table_name = $id = $activity_type = '';
-    $response = $diff = $pg_params = $foreign_id = $foreign_ids = $revisions = $previous_value = $obj = array();
-    $sql = $json = false;
+    $table_name = $id = $activity_type = '';
+    $response = $foreign_id = $foreign_ids = $revisions = $previous_value = array();
+    $sql = false;
     unset($r_put['temp_id']);
     switch ($r_resource_cmd) {
     case '/users/?/activation': //users activation
@@ -6953,9 +6940,6 @@ function r_put($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_put)
         }
         if (isset($r_put['r_gridview_configure'])) {
             if (is_plugin_enabled('r_gridview_configure')) {
-                $field_arr = array(
-                    'r_gridview_configure',
-                );
                 $custom_fields_array = array();
                 $custom_fields_array['r_gridview_configure'] = $r_put['r_gridview_configure'];
                 $boardCustomFields = executeQuery('SELECT board_custom_fields FROM boards WHERE id = $1', [$id]);
@@ -6990,9 +6974,6 @@ function r_put($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_put)
         }
         if (isset($r_put['r_listview_configure'])) {
             if (is_plugin_enabled('r_listview_configure')) {
-                $field_arr = array(
-                    'r_listview_configure'
-                );
                 $custom_fields_array = array();
                 $custom_fields_array['r_listview_configure'] = $r_put['r_listview_configure'];
                 $boardCustomFields = executeQuery('SELECT board_custom_fields FROM boards WHERE id = $1', [$id]);
@@ -7025,9 +7006,6 @@ function r_put($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_put)
         }
         if (isset($r_put['r_listview_configure_position'])) {
             if (is_plugin_enabled('r_listview_configure')) {
-                $field_arr = array(
-                    'r_listview_configure_position',
-                );
                 $custom_fields_array = array();
                 $custom_fields_array['r_listview_configure_position'] = $r_put['r_listview_configure_position'];
                 $boardCustomFields = executeQuery('SELECT board_custom_fields FROM boards WHERE id = $1', [$id]);
@@ -8182,7 +8160,7 @@ function r_delete($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             $_GET['token'],
             $revision
         );
-        $activity = pg_fetch_assoc(pg_query_params($db_lnk, 'INSERT INTO activities (created, modified, board_id, user_id, type, comment, token, revisions) VALUES (now(), now(),$1, $2, $3, $4, $5, $6) RETURNING id', $qry_val_arr));
+        pg_fetch_assoc(pg_query_params($db_lnk, 'INSERT INTO activities (created, modified, board_id, user_id, type, comment, token, revisions) VALUES (now(), now(),$1, $2, $3, $4, $5, $6) RETURNING id', $qry_val_arr));
         break;
 
     case '/boards/?/lists/?/cards/?': // delete card

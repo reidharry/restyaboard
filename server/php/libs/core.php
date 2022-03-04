@@ -3529,7 +3529,7 @@ function importMondayBoards($path, $folder)
         fastcgi_finish_request();
     }
     foreach ($boards as $key => $board) {
-        $users = $userNames = $lists = $listNames = $cards = $cardLists = $labels = array();
+        $users = $userNames = $lists = $listNames = $cards = $labels = array();
         if (!empty($board)) {
             $user_id = $authUser['id'];
             // insert new board
@@ -3752,7 +3752,7 @@ function importMondayBoards($path, $folder)
                                 $created_at,
                                 $updated_at
                             );
-                            $_subcard = pg_fetch_assoc(pg_query_params($db_lnk, 'INSERT INTO cards (created, modified, board_id, list_id, name, description, is_archived, position, due_date, user_id) VALUES ($9, $10, $1, $2, $3, $4, $5, $6, $7, $8) RETURNING id', $qry_val_arr));
+                            pg_fetch_assoc(pg_query_params($db_lnk, 'INSERT INTO cards (created, modified, board_id, list_id, name, description, is_archived, position, due_date, user_id) VALUES ($9, $10, $1, $2, $3, $4, $5, $6, $7, $8) RETURNING id', $qry_val_arr));
                         }
                     }
                     // Import labels
@@ -3787,7 +3787,6 @@ function importMondayBoards($path, $folder)
                                 if (!file_exists($mediadir)) {
                                     mkdir($mediadir, 0777, true);
                                 }
-                                $fullpath = MEDIA_PATH . DS . 'import' . DS . $folder . DS . 'assets' . DS . $attachment_id . "_" . $attachment_name;
                                 copy($imagefiles[0], $mediadir . DS . $attachment_name);
                                 $qry_val_arr = array(
                                     $new_board['id'],
