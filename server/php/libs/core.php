@@ -656,12 +656,11 @@ function PushNotificationCurlExecute($url, $payload)
  * @param string $profile_picture_path  Notification user Avatar
  * @param string $title                 Notification title
  * @param string $comment               Notification Comment
- * @param string $additional_info       Notification Additional Information
  *
  *
  * @return void
  */
-function sendPushNotification($user_id, $user_device_tokens = [], $profile_picture_path, $title, $comment, $additional_info)
+function sendPushNotification($user_id, $user_device_tokens = [], $profile_picture_path, $title, $comment)
 {
     global $db_lnk;
     $andriod_push_message = array(
@@ -677,7 +676,6 @@ function sendPushNotification($user_id, $user_device_tokens = [], $profile_pictu
     $apns_push_message = array(
         "aps" => ["alert" => $comment],
     );
-    $ios_device_tokens = array();
     $device_tokens = json_decode($user_device_tokens);
     foreach ($device_tokens as $value) {
         if ($value->device_os === 'Android') {
@@ -796,7 +794,6 @@ function copyCards($cards, $new_list_id, $name, $new_board_id = '')
     global $db_lnk, $authUser;
     $foreign_ids = $response = array();
     while ($card = pg_fetch_object($cards)) {
-        $old_list_id = $card->list_id;
         $card->list_id = $new_list_id;
         $card_id = $card->id;
         if ($card->due_date === null) {
@@ -1992,8 +1989,8 @@ function importKantreeBoard($jsonArr = array())
                         } elseif ($action['verb'] == 'ARCHIVE' && $action['object']['type'] == 'Card') {
                             $lists_key = $cardLists[$action['object']['id']];
                             $cards_key = $cards[$action['object']['id']];
+                            $type = 'archived_card';
                             $comment = __l('##USER_NAME## archived card ##CARD_LINK##');
-                            $activity_type = 'archived_card';
                         } elseif ($action['verb'] == 'MOVE' && $action['target']['type'] == 'CardGroup') {
                             $lists_key = $cardLists[$action['object']['id']];
                             $cards_key = $cards[$action['object']['id']];
@@ -2212,6 +2209,7 @@ function importTaigaBoard($board = array())
                 }
                 if (!empty($card['attachments'])) {
                     foreach ($card['attachments'] as $attachment) {
+                        $mediadir = '';
                         $mediadir = MEDIA_PATH . DS . 'Card' . DS . $_card['id'];
                         if (!file_exists($mediadir)) {
                             mkdir($mediadir, 0777, true);
@@ -4560,7 +4558,7 @@ function sendMailNotification($notificationType)
                 }
                 $push_message_title = (!empty($activity['full_name']) ? $activity['full_name'] : 'Deleted account');
                 if (!empty($user['user_push_tokens'])) {
-                    sendPushNotification($user['id'], $user['user_push_tokens'], $profile_picture_path, $push_message_title, strip_tags($comment) , $reply_to);
+                    sendPushNotification($user['id'], $user['user_push_tokens'], $profile_picture_path, $push_message_title, strip_tags($comment));
                 }
                 $notification_count++;
             }
@@ -4731,7 +4729,7 @@ function sendMailNotification($notificationType)
                 }
                 $push_message_title = (!empty($activity['full_name']) ? $activity['full_name'] : 'Deleted account');
                 if (!empty($user['user_push_tokens'])) {
-                    sendPushNotification($user['id'], $user['user_push_tokens'], $profile_picture_path, $push_message_title, strip_tags($comment) , $reply_to);
+                    sendPushNotification($user['id'], $user['user_push_tokens'], $profile_picture_path, $push_message_title, strip_tags($comment));
                 }
                 $notification_count++;
             }
@@ -4902,7 +4900,7 @@ function sendMailNotification($notificationType)
                 }
                 $push_message_title = (!empty($activity['full_name']) ? $activity['full_name'] : 'Deleted account');
                 if (!empty($user['user_push_tokens'])) {
-                    sendPushNotification($user['id'], $user['user_push_tokens'], $profile_picture_path, $push_message_title, strip_tags($comment) , $reply_to);
+                    sendPushNotification($user['id'], $user['user_push_tokens'], $profile_picture_path, $push_message_title, strip_tags($comment));
                 }
                 $notification_count++;
             }
