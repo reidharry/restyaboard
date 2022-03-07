@@ -721,7 +721,7 @@ function saveIp()
         $country_id = 0;
         $_geo = array();
         if (function_exists('geoip_record_by_name')) {
-            $_geo = @geoip_record_by_name($_SERVER['REMOTE_ADDR']);
+            $_geo = geoip_record_by_name($_SERVER['REMOTE_ADDR']);
         }
         if (!empty($_geo)) {
             $qry_val_arr = array(
