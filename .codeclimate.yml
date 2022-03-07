@@ -64,6 +64,8 @@ plugins:
   phpmd:
     enabled: true
     checks:
+      CleanCode/BooleanArgumentFlag:
+        enabled: false
       CleanCode/MissingImport:
         enabled: false
       CleanCode/StaticAccess:
