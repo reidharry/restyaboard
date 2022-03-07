@@ -16,6 +16,8 @@ plugins:
         enabled: false
       duplicate-background-images:
         enabled: false
+      duplicate-properties:
+        enabled: false
       important:
         enabled: false
       order-alphabetical:
@@ -30,6 +32,11 @@ plugins:
     enabled: true
   fixme:
     enabled: true
+    checks:
+      TODO:
+        enabled: false
+      XXX:
+        enabled: false
   phpmd:
     enabled: true
     checks:
