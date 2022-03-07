@@ -12,6 +12,8 @@ plugins:
     checks:
       adjoining-classes:
         enabled: false
+      box-model:
+        enabled: false
       box-sizing:
         enabled: false
       duplicate-background-images:
@@ -21,6 +23,8 @@ plugins:
       empty-rules:
         enabled: false
       fallback-colors:
+        enabled: false
+      gradients:
         enabled: false
       known-properties:
         enabled: false
@@ -37,6 +41,10 @@ plugins:
       unqualified-attributes:
         enabled: false
       regex-selectors:
+        enabled: false
+      star-property-hack:
+        enabled: false
+      underscore-property-hack:
         enabled: false
       zero-units:
         enabled: false
