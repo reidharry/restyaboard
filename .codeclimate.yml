@@ -10,11 +10,15 @@ plugins:
   csslint:
     enabled: true
     checks:
+      duplicate-background-images:
+        enabled: false
       order-alphabetical:
         enabled: false
       outline-none:
         enabled: false
       overqualified-elements:
+        enabled: false
+      zero-units:
         enabled: false
   eslint:
     enabled: true
