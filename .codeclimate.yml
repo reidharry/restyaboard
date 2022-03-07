@@ -64,6 +64,10 @@ plugins:
         enabled: false
       Controversial/Superglobals:
         enabled: false
+      Design/LongMethod:
+        enabled: false
+      Design/NpathComplexity:
+        enabled: false
       Naming/LongVariable:
         enabled: false
       Naming/ShortVariable:
