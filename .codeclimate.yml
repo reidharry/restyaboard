@@ -18,6 +18,10 @@ plugins:
         enabled: false
       duplicate-properties:
         enabled: false
+      empty-rules:
+        enabled: false
+      known-properties:
+        enabled: false
       important:
         enabled: false
       order-alphabetical:
