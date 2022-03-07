@@ -99,16 +99,15 @@ function _is_writable_recursive($dir) {
     if (is_dir($dir)){
         if (!($folder = opendir($dir))) {
             return false;
-        } else {
-            while (($file = readdir($folder)) !== false) {
-                if ($file != '.' && $file != '..' && (!is_writable($dir . '/' . $file) || (is_dir($dir . '/' . $file) && !_is_writable_recursive($dir . '/' . $file)))) {
-                    closedir($folder);
-                    return false;
-                }
-            }
-            closedir($folder);
-            return true;
         }
+        while (($file = readdir($folder)) !== false) {
+            if ($file != '.' && $file != '..' && (!is_writable($dir . '/' . $file) || (is_dir($dir . '/' . $file) && !_is_writable_recursive($dir . '/' . $file)))) {
+                closedir($folder);
+                return false;
+            }
+        }
+        closedir($folder);
+        return true;
     }
 }
 if (file_exists(APP_PATH . '/client/apps/r_ldap_login/app.json')) {
