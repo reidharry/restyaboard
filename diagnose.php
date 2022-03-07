@@ -97,7 +97,8 @@ if (function_exists('imap_open')) {
 }
 function _is_writable_recursive($dir) {
     if (is_dir($dir)){
-        if (!($folder = opendir($dir))) {
+        $folder = opendir($dir);
+        if (!($folder)) {
             return false;
         }
         while (($file = readdir($folder)) !== false) {
