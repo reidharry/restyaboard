@@ -16,6 +16,8 @@ plugins:
         enabled: false
       box-sizing:
         enabled: false
+      compatible-vendor-prefixes:
+        enabled: false
       duplicate-background-images:
         enabled: false
       duplicate-properties:
@@ -43,6 +45,8 @@ plugins:
       regex-selectors:
         enabled: false
       star-property-hack:
+        enabled: false
+      text-indent:
         enabled: false
       underscore-property-hack:
         enabled: false
