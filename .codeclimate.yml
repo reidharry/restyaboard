@@ -16,6 +16,8 @@ plugins:
         enabled: false
       duplicate-background-images:
         enabled: false
+      important:
+        enabled: false
       order-alphabetical:
         enabled: false
       outline-none:
