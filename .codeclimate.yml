@@ -54,6 +54,8 @@ plugins:
     checks:
       CleanCode/MissingImport:
         enabled: false
+      CleanCode/StaticAccess:
+        enabled: false
       Controversial/CamelCaseMethodName:
         enabled: false
       Controversial/CamelCaseParameterName:
@@ -63,6 +65,8 @@ plugins:
       Controversial/CamelCaseVariableName:
         enabled: false
       Controversial/Superglobals:
+        enabled: false
+      CyclomaticComplexity:
         enabled: false
       Design/LongMethod:
         enabled: false
