@@ -20,6 +20,8 @@ plugins:
         enabled: false
       empty-rules:
         enabled: false
+      fallback-colors:
+        enabled: false
       known-properties:
         enabled: false
       important:
@@ -29,6 +31,12 @@ plugins:
       outline-none:
         enabled: false
       overqualified-elements:
+        enabled: false
+      universal-selector:
+        enabled: false
+      unqualified-attributes:
+        enabled: false
+      regex-selectors:
         enabled: false
       zero-units:
         enabled: false
