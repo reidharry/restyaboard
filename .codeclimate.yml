@@ -10,6 +10,10 @@ plugins:
   csslint:
     enabled: true
     checks:
+      adjoining-classes:
+        enabled: false
+      box-sizing:
+        enabled: false
       duplicate-background-images:
         enabled: false
       order-alphabetical:
