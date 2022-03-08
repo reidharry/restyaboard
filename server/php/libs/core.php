@@ -531,7 +531,8 @@ function checkAclLinks($r_request_method = 'GET', $r_resource_cmd = '/users', $r
         if (empty($organization_allowed_link)) {
             return false;
         }
-    } else {
+    } 
+    if (empty($r_resource_vars['boards']) && empty($r_resource_vars['organizations'])) {
         if (!empty($r_request_method) && ($r_request_method === 'POST') && !empty($r_resource_cmd) && ($r_resource_cmd === '/settings')) {
             $r_request_method = 'GET';
         }
@@ -1067,6 +1068,9 @@ function createTrelloMember($member = array() , $admin_user_id = array() , $new_
         utf8_decode($member['username'])
     );
     $userExist = executeQuery('SELECT * FROM users WHERE username = $1', $qry_val_arr);
+    if (!empty($userExist)) {
+        $user_id = $userExist['id'];
+    }
     if (!$userExist) {
         $default_email_notification = 0;
         if (DEFAULT_EMAIL_NOTIFICATION === 'Periodically') {
@@ -1099,8 +1103,6 @@ function createTrelloMember($member = array() , $admin_user_id = array() , $new_
         );
         $user = pg_fetch_assoc(pg_query_params($db_lnk, 'INSERT INTO users (created, modified, role_id, username, email, password, is_active, is_email_confirmed, initials, full_name, is_send_newsletter, default_desktop_notification, is_list_notifications_enabled, is_card_notifications_enabled, is_card_members_notifications_enabled, is_card_labels_notifications_enabled, is_card_checklists_notifications_enabled, is_card_attachments_notifications_enabled) VALUES (now(), now(), 2, $1, $13, $2, true, true, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id', $qry_val_arr));
         $user_id = $user['id'];
-    } else {
-        $user_id = $userExist['id'];
     }
     $board_user_role_id = 2;
     if (in_array($member['id'], $admin_user_id)) {
@@ -1595,18 +1597,16 @@ function importTrelloBoard($board = array())
                     $comment = utf8_decode($comment);
                     $created = $modified = $action['date'];
                     if (!empty($action['data']['list']['id'])) {
+                        $lists_key = '';
                         if (array_key_exists($action['data']['list']['id'], $lists)) {
                             $lists_key = $lists[$action['data']['list']['id']];
-                        } else {
-                            $lists_key = '';
                         }
                     }
                     if (!empty($action['data']['card']['id'])) {
+                        $cards_key = '';
                         if (array_key_exists($action['data']['card']['id'], $cards)) {
                             $cards_key = $cards[$action['data']['card']['id']];
                             $lists_key = $cardLists[$action['data']['card']['id']];
-                        } else {
-                            $cards_key = '';
                         }
                     }
                     if (!array_key_exists($action['idMemberCreator'], $users) || empty($users[$action['idMemberCreator']])) {
@@ -1975,12 +1975,11 @@ function importKantreeBoard($jsonArr = array())
                                     $comment = __l('##USER_NAME## SET due date to the card ##CARD_LINK##');
                                 }
                             } elseif ($action['object']['value'] == 'Attachments') {
+                                $type = 'add_card_attachment';
+                                $comment = __l('##USER_NAME## added attachment to the card ##CARD_LINK##');
                                 if ($action['message'] == '{actor} removed all files from {object} in {target}') {
                                     $type = 'delete_card_attachment';
                                     $comment = __l('##USER_NAME## deleted attachment from card ##CARD_LINK##');
-                                } else {
-                                    $type = 'add_card_attachment';
-                                    $comment = __l('##USER_NAME## added attachment to the card ##CARD_LINK##');
                                 }
                             } elseif (!empty($action['origin'])) {
                                 $type = 'edit_card';
@@ -2288,12 +2287,11 @@ function importTaigaBoard($board = array())
                         $type = 'add_list';
                         $comment = sprintf(__l('##USER_NAME## added list %s') , $action['data']['values_diff']['status'][1]);
                     } elseif (isset($action['data']['values_diff']['due_date']) && !empty($action['data']['values_diff']['due_date'])) {
+                        $type = 'add_card_duedate';
+                        $comment = __l('##USER_NAME## SET due date to the card ##CARD_LINK##');
                         if ($action['data']['values_diff']['due_date'][0]) {
                             $type = 'delete_card_duedate';
                             $comment = __l('Due date was removed to the card ##CARD_LINK##');
-                        } else {
-                            $type = 'add_card_duedate';
-                            $comment = __l('##USER_NAME## SET due date to the card ##CARD_LINK##');
                         }
                     }
                 }
@@ -3018,12 +3016,11 @@ function importTaskWarriorBoard($jsonArr = array())
                 if (!empty($json['project']) && isset($json['project'])) {
                     $board_name = $json['project'];
                 }
+                $tmp_list = $board['lists'][0];
                 if ($json['status'] == 'completed') {
                     $tmp_list = $board['lists'][2];
                 } else if ($json['status'] == 'waiting' || $json['status'] == 'recurring') {
                     $tmp_list = $board['lists'][1];
-                } else {
-                    $tmp_list = $board['lists'][0];
                 }
                 $json['idList'] = $tmp_list['gid'];
                 $board['cards'][] = $json;
