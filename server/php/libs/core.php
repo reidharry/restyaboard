@@ -212,6 +212,7 @@ function curlExecute($url, $method = 'get', $post = array() , $format = 'plain')
             curl_setopt($ch, CURLOPT_HEADER, false);
         }
     } elseif ($method == 'post') {
+        $post_string = http_build_query($post, '', '&');
         if ($format == 'json') {
             $post_string = json_encode($post);
             $curl_opt = array(
@@ -219,8 +220,6 @@ function curlExecute($url, $method = 'get', $post = array() , $format = 'plain')
                 'Content-Length: ' . strlen($post_string)
             );
             curl_setopt($ch, CURLOPT_HTTPHEADER, $curl_opt);
-        } else {
-            $post_string = http_build_query($post, '', '&');
         }
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $post_string);
@@ -325,10 +324,9 @@ function insertActivity($user_id, $comment, $type, $foreign_ids = array() , $rev
         'revisions',
         'token'
     );
+    $token = '';
     if (!empty($_GET['token'])) {
         $token = $_GET['token'];
-    } else {
-        $token = '';
     }
     $values = array(
         'now()',
@@ -612,14 +610,14 @@ function sendMail($template, $replaceContent, $toMail, $replyToMail = '')
         if (is_plugin_enabled('r_sparkpost')) {
             require_once PLUGIN_PATH . DS . 'SparkPost' . DS . 'functions.php';
             $result = SparkPostMail($toMail, $subject, $message, $headers, DEFAULT_FROM_EMAIL_ADDRESS);
-        } else {
+        }
+        if (!is_plugin_enabled('r_sparkpost')) {
             $result = mail($toMail, $subject, $message, $headers, '-f' . DEFAULT_FROM_EMAIL_ADDRESS);
         }
         if (R_DEBUG) {
+            $compose_string = 'S, ' . $from_email . ', ' . $toMail . ', ' . $subject;
             if (!$result) {
                 $compose_string = 'F, ' . $from_email . ', ' . $toMail . ', ' . $subject;
-            } else {
-                $compose_string = 'S, ' . $from_email . ', ' . $toMail . ', ' . $subject;
             }
             error_log($compose_string, 3, CACHE_PATH . DS . 'mail.log');
         }
@@ -1022,13 +1020,12 @@ function getbindValues($table, $data)
             $ip_id = saveIp();
             $bindValues[$field] = $ip_id;
         } elseif (array_key_exists($field, $data)) {
+            $bindValues[$field] = $data[$field];
             if ($field == 'is_active' || $field == 'is_allow_email_alias') {
                 $boolean = !empty($data[$field]) ? 'true' : 'false';
                 $bindValues[$field] = $boolean;
             } else if ($field == 'due_date' && $data[$field] == null) {
                 $bindValues[$field] = null;
-            } else {
-                $bindValues[$field] = $data[$field];
             }
         }
     }
@@ -1240,6 +1237,9 @@ function importTrelloBoard($board = array())
                     utf8_decode($member['username'])
                 );
                 $userExist = executeQuery('SELECT * FROM users WHERE username = $1', $qry_val_arr);
+                if (!empty($userExist)) {
+                    $users[$member['id']] = $userExist['id'];
+                }
                 if (!$userExist) {
                     $default_email_notification = 0;
                     if (DEFAULT_EMAIL_NOTIFICATION === 'Periodically') {
@@ -1284,8 +1284,6 @@ function importTrelloBoard($board = array())
                         );
                         pg_query_params($db_lnk, 'UPDATE users SET profile_picture_path = $1 WHERE id = $2', $qry_val_arr);
                     }
-                } else {
-                    $users[$member['id']] = $userExist['id'];
                 }
                 $board_user_role_id = 2;
                 if (in_array($member['id'], $admin_user_id)) {
@@ -1730,7 +1728,8 @@ function importKantreeBoard($jsonArr = array())
                         }
                     }
                 }
-            } else {
+            } 
+            if (empty($json['board_created'])) {
                 $board['cards'][] = $json;
             }
             if (!empty($json['groups'])) {
@@ -1993,6 +1992,8 @@ function importKantreeBoard($jsonArr = array())
                         } elseif ($action['verb'] == 'MOVE' && $action['target']['type'] == 'CardGroup') {
                             $lists_key = $cardLists[$action['object']['id']];
                             $cards_key = $cards[$action['object']['id']];
+                            $type = 'moved_list_card';
+                            $comment = sprintf(__l('##USER_NAME## moved card to list %s') , $action['target']['value']);
                             if (!empty($labels[$action['target']['id']])) {
                                 $type = 'add_card_label';
                                 $comment = __l('##USER_NAME## added label to the card ##CARD_LINK## - ##LABEL_NAME##');
@@ -2000,9 +2001,6 @@ function importKantreeBoard($jsonArr = array())
                                     $type = 'delete_card_label';
                                     $comment = sprintf(__l('##USER_NAME## removed label in the card ##CARD_LINK## - %s') , $action['target']['value']);
                                 }
-                            } else {
-                                $type = 'moved_list_card';
-                                $comment = sprintf(__l('##USER_NAME## moved card to list %s') , $action['target']['value']);
                             }
                         } elseif ($action['verb'] == 'CREATE' && $action['object']['type'] == 'CardGroup' && !empty($action['project_id'])) {
                             $type = 'add_list';
@@ -2264,17 +2262,17 @@ function importTaigaBoard($board = array())
                         if ($action['data']['values_diff']['assigned_users'][0]) {
                             $type = 'delete_card_users';
                             $comment = __l('##USER_NAME## deleted member from card ##CARD_LINK##');
-                        } else {
+                        } 
+                        if ($action['data']['values_diff']['assigned_users'][1]) {
                             $type = 'add_card_user';
                             $comment = sprintf(__l('##USER_NAME## added %s as member to the card ##CARD_LINK##') , $action['data']['values_diff']['assigned_users'][1]);
                         }
                     } elseif (isset($action['data']['values_diff']['tags']) && !empty($action['data']['values_diff']['tags'])) {
+                        $type = 'delete_card_label';
+                        $comment = sprintf(__l('##USER_NAME## removed label in the card ##CARD_LINK## - %s') , $action['data']['values_diff']['tags'][1][0]);
                         if ($action['data']['values_diff']['tags'][0][0]) {
                             $type = 'add_card_label';
                             $comment = sprintf(__l('##USER_NAME## added label to the card ##CARD_LINK## - %s') , $action['data']['values_diff']['tags'][0][0]);
-                        } else {
-                            $type = 'delete_card_label';
-                            $comment = sprintf(__l('##USER_NAME## removed label in the card ##CARD_LINK## - %s') , $action['data']['values_diff']['tags'][1][0]);
                         }
                     } elseif (isset($action['data']['values_diff']['description_diff']) && !empty($action['data']['values_diff']['description_diff'])) {
                         $type = 'edit_card_desc';
@@ -2368,10 +2366,11 @@ function importWekanBoard($board = array())
         }
         $background_image = $background_pattern = '';
         if (!empty($board['backgroundImage'])) {
+            if ($board['backgroundTile'] !== 'true') {
+                $background_image = $board['backgroundImage'];
+            }
             if ($board['backgroundTile'] == 'true') {
                 $background_pattern = $board['backgroundImage'];
-            } else {
-                $background_image = $board['backgroundImage'];
             }
         }
         //board Creation
@@ -2636,17 +2635,15 @@ function importWekanBoard($board = array())
                 $comment = utf8_decode($comment);
                 $created = $modified = $action['createdAt'];
                 if (!empty($action['listId'])) {
+                    $lists_key = '';
                     if (array_key_exists($action['listId'], $lists)) {
                         $lists_key = $lists[$action['listId']];
-                    } else {
-                        $lists_key = '';
                     }
                 }
                 if (!empty($action['cardId'])) {
+                    $cards_key = '';
                     if (array_key_exists($action['cardId'], $cards)) {
                         $cards_key = $cards[$action['cardId']];
-                    } else {
-                        $cards_key = '';
                     }
                 }
                 if (empty($lists_key) && empty($cards_key)) {
@@ -3457,6 +3454,9 @@ function importMondayBoards($path, $folder)
                             } else {
                                 $arrResult = array();
                                 foreach ($value as $valKey => $val) {
+                                    if ($all_rows[$valKey] != 'Item ID (auto generated)') {
+                                        $arrResult[$all_rows[$valKey]] = $val;
+                                    }
                                     if ($all_rows[$valKey] == 'Status') {
                                         $status = $val;
                                         if ($val == '') {
@@ -3486,8 +3486,6 @@ function importMondayBoards($path, $folder)
                                         }
                                     } else if ($all_rows[$valKey] == 'Item ID (auto generated)') {
                                         $arrResult['Item ID'] = $val;
-                                    } else {
-                                        $arrResult[$all_rows[$valKey]] = $val;
                                     }
                                 }
                                 $tmpboard['cards'][] = $arrResult;
@@ -3856,10 +3854,9 @@ function email2name($email)
     // replace non-text
     $name = trim(ucwords(preg_replace('/[\W\d_]+/', ' ', strtolower($email))));
     // split by final space
+    $full_name = $name;
     if (preg_match('/(.*)?\s(.*)$/', $name, $matches)) {
         $full_name = $matches[1] . ' ' . $matches[2];
-    } else {
-        $full_name = $name;
     }
     return $full_name;
 }
@@ -4437,12 +4434,12 @@ function sendMailNotification($notificationType)
                     }
                     $br = '<div style="line-height:20px;">&nbsp;</div>';
                 } else {
+                    $br = '<div style="line-height:40px;">&nbsp;</div>';
                     if ($is_mention_activity) {
                         $mentioned_activity['comment'].= __l(' on ##BOARD_NAME##');
-                        $br = '<div style="line-height:40px;">&nbsp;</div>';
-                    } else {
+                    }
+                    if (!$is_mention_activity) {
                         $activity['comment'].= __l(' on ##BOARD_NAME##');
-                        $br = '<div style="line-height:40px;">&nbsp;</div>';
                     }
                 }
                 if (!empty($activity['list_name']) && in_array($activity['type'], $card_activity_types)) {
