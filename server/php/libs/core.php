@@ -685,7 +685,8 @@ function sendPushNotification($user_id, $user_device_tokens = [], $profile_pictu
                 'data' => $andriod_push_message
             );
             PushNotificationCurlExecute('http://push.restya.com:8322/api/push/fcm', $payload);
-        } else {
+        } 
+        if ($value->device_os !== 'Android') {
             $payload = array(
                 'service' => 'apns',
                 'headers' => ["apns-priority" => 10,
@@ -1152,10 +1153,11 @@ function importTrelloBoard($board = array())
         }
         $background_image = $background_pattern = '';
         if (!empty($board['prefs']['backgroundImage'])) {
+            if ($board['prefs']['backgroundTile'] == 'false') {
+                $background_image = $board['prefs']['backgroundImage'];
+            }
             if ($board['prefs']['backgroundTile'] == 'true') {
                 $background_pattern = $board['prefs']['backgroundImage'];
-            } else {
-                $background_image = $board['prefs']['backgroundImage'];
             }
         }
         $qry_val_arr = array(
@@ -1612,7 +1614,8 @@ function importTrelloBoard($board = array())
                     if (!array_key_exists($action['idMemberCreator'], $users) || empty($users[$action['idMemberCreator']])) {
                         if (!empty($action['memberCreator'])) {
                             $users[$action['idMemberCreator']] = createTrelloMember($action['memberCreator'], $admin_user_id, $new_board);
-                        } else {
+                        }
+                        if (empty($action['memberCreator'])) {
                             $users[$action['idMemberCreator']] = 1;
                         }
                     }
@@ -1952,27 +1955,24 @@ function importKantreeBoard($jsonArr = array())
                             $cards_key = $cards[$action['target']['id']];
                             if ($action['object']['value'] == 'Description') {
                                 $type = 'edit_card_desc';
+                                $comment = __l('##USER_NAME## updated card description in ##CARD_LINK##');
                                 if ($action['message'] == '{actor} cleared {object} on {target}') {
                                     $comment = __l('##USER_NAME## removed card description from ##CARD_LINK##');
-                                } else {
-                                    $comment = __l('##USER_NAME## updated card description in ##CARD_LINK##');
                                 }
                             } elseif ($action['object']['value'] == 'Assignees') {
                                 $memberName = (!empty($memberNames[$action['sub_object']['id']])) ? $memberNames[$action['sub_object']['id']] : '';
+                                $type = 'add_card_user';
+                                $comment = sprintf(__l('##USER_NAME## added %s as member to the card ##CARD_LINK##') , $memberName);
                                 if ($action['message'] == '{actor} unassigned {sub_object} from {object} on {target}') {
                                     $type = 'delete_card_users';
                                     $comment = __l('##USER_NAME## deleted member from card ##CARD_LINK##');
-                                } else {
-                                    $type = 'add_card_user';
-                                    $comment = sprintf(__l('##USER_NAME## added %s as member to the card ##CARD_LINK##') , $memberName);
                                 }
                             } elseif ($action['object']['value'] == 'Due Date') {
+                                $type = 'add_card_duedate';
+                                $comment = __l('##USER_NAME## SET due date to the card ##CARD_LINK##');
                                 if ($action['message'] == '{actor} cleared {object} on {target}') {
                                     $type = 'delete_card_duedate';
                                     $comment = __l('Due date was removed to the card ##CARD_LINK##');
-                                } else {
-                                    $type = 'add_card_duedate';
-                                    $comment = __l('##USER_NAME## SET due date to the card ##CARD_LINK##');
                                 }
                             } elseif ($action['object']['value'] == 'Attachments') {
                                 $type = 'add_card_attachment';
@@ -1994,12 +1994,11 @@ function importKantreeBoard($jsonArr = array())
                             $lists_key = $cardLists[$action['object']['id']];
                             $cards_key = $cards[$action['object']['id']];
                             if (!empty($labels[$action['target']['id']])) {
+                                $type = 'add_card_label';
+                                $comment = __l('##USER_NAME## added label to the card ##CARD_LINK## - ##LABEL_NAME##');
                                 if ($action['message'] == '{actor} removed {object} from {target}') {
                                     $type = 'delete_card_label';
                                     $comment = sprintf(__l('##USER_NAME## removed label in the card ##CARD_LINK## - %s') , $action['target']['value']);
-                                } else {
-                                    $type = 'add_card_label';
-                                    $comment = __l('##USER_NAME## added label to the card ##CARD_LINK## - ##LABEL_NAME##');
                                 }
                             } else {
                                 $type = 'moved_list_card';
@@ -2524,10 +2523,9 @@ function importWekanBoard($board = array())
             foreach ($board['cards'] as $card) {
                 $is_closed = ($card['archived']) ? 'true' : 'false';
                 $date = (!empty($card['dueAt'])) ? $card['dueAt'] : NULL;
+                $description = '';
                 if (isset($card['description']) && !empty($card['description'])) {
                     $description = $card['description'];
-                } else {
-                    $description = '';
                 }
                 $qry_val_arr = array(
                     $new_board['id'],
@@ -3278,10 +3276,9 @@ function importpipefyBoard($board = array())
             $i+= 1;
             $is_closed = 'false';
             $date = (!empty($card['Due date']) && $card['Due date'] !== 'NULL') ? date('Y-m-d H:i:s', strtotime($card['Due date'])) : NULL;
+            $description = '';
             if (isset($card['Describe this bug']) && !empty($card['Describe this bug']) && $card['Describe this bug'] !== 'NULL') {
                 $description = $card['Describe this bug'];
-            } else {
-                $description = '';
             }
             $card_user_id = (!empty($card['Creator']) && $card['Creator'] !== "NULL") ? $userNames[$card['Creator']] : $user_id;
             $created_at = (!empty($card['Created at']) && $card['Created at'] !== "NULL") ? date('Y-m-d H:i:s', strtotime($card['Created at'])) : date('Y-m-d H:i:s');
@@ -3614,10 +3611,9 @@ function importMondayBoards($path, $folder)
                     $i+= 1;
                     $is_closed = 'false';
                     $date = (!empty($card['Date']) && $card['Date'] !== '') ? date('Y-m-d H:i:s', strtotime($card['Date'])) : NULL;
+                    $description = '';
                     if (isset($card['Text']) && !empty($card['Text']) && $card['Text'] !== 'NULL') {
                         $description = $card['Text'];
-                    } else {
-                        $description = '';
                     }
                     $card_user_id = (!empty($card['Creator']) && $card['Creator'] !== "") ? $userNames[$card['Creator']] : $user_id;
                     $created_at = (!empty($card['Created at']) && $card['Created at'] !== "") ? date('Y-m-d H:i:s', strtotime($card['Created at'])) : date('Y-m-d H:i:s');
