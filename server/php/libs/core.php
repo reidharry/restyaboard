@@ -1153,7 +1153,9 @@ function importTrelloBoard($board = array())
         }
         $background_image = $background_pattern = '';
         if (!empty($board['prefs']['backgroundImage'])) {
-            $background_image = $board['prefs']['backgroundImage'];
+            if ($board['prefs']['backgroundTile'] == 'false') {
+                $background_image = $board['prefs']['backgroundImage'];
+            }
             if ($board['prefs']['backgroundTile'] == 'true') {
                 $background_pattern = $board['prefs']['backgroundImage'];
             }
