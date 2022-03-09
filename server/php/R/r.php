@@ -234,7 +234,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             $i++;
         }
         if (!empty($sql)) {
-            if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+            $result = pg_query_params($db_lnk, $sql, $pg_params);
+            if ($result) {
                 $data = array();
                 $board_lists = array();
                 while ($row = pg_fetch_row($result)) {
@@ -293,7 +294,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
         }
         $sql = 'SELECT row_to_json(d) FROM (SELECT * FROM user_logins_listing ul ' . $filter_condition . ' ORDER BY ' . $order_by . ' ' . $direction . ' limit ' . $_metadata['limit'] . ' offset ' . $_metadata['offset'] . ') as d ';
         if (!empty($sql)) {
-            if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+            $result = pg_query_params($db_lnk, $sql, $pg_params);
+            if ($result) {
                 $data = array();
                 $board_lists = array();
                 while ($row = pg_fetch_row($result)) {
@@ -355,7 +357,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             true
         );
         if (!empty($sql)) {
-            if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+            $result = pg_query_params($db_lnk, $sql, $pg_params);
+            if ($result) {
                 $data = array();
                 $board_lists = array();
                 while ($row = pg_fetch_row($result)) {
@@ -507,10 +510,10 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
                 // If Restricted board user
                 if (!empty($assigned_card_ids) || !empty($assigned_board_ids)) {
                     if (!empty($r_resource_filters['last_activity_id'])) {
-                        $condition = ' AND al.id > $7';
+                        $condition = ' AND al.id > $9';
                     }
-                    $sql = 'SELECT row_to_json(d) FROM (SELECT * FROM activities_listing al WHERE (board_id = ANY ( $1 ) OR organization_id  = ANY ( $2 ) OR revisions = $3 OR type = $8 OR type = $9 OR (card_id = ANY ($4) OR (board_id = ANY($5) AND card_id = $6) ) ) ' . $condition . ' ORDER BY id ' . $direction . ' LIMIT ' . PAGING_COUNT . ') as d';
-                    $c_sql = 'SELECT COUNT(*) FROM activities_listing al WHERE (board_id = ANY ( $1 ) OR organization_id  = ANY ( $2 ) OR revisions = $3 OR type = $8 OR type = $9 OR (card_id = ANY ($4) OR (board_id = ANY($5) AND card_id = $6) ) ) ' . $condition;
+                    $sql = 'SELECT row_to_json(d) FROM (SELECT * FROM activities_listing al WHERE (board_id = ANY ( $1 ) OR organization_id  = ANY ( $2 ) OR revisions = $3 OR type = $7 OR type = $8 OR (card_id = ANY ($4) OR (board_id = ANY($5) AND card_id = $6) ) ) ' . $condition . ' ORDER BY id ' . $direction . ' LIMIT ' . PAGING_COUNT . ') as d';
+                    $c_sql = 'SELECT COUNT(*) FROM activities_listing al WHERE (board_id = ANY ( $1 ) OR organization_id  = ANY ( $2 ) OR revisions = $3 OR type = $7 OR type = $8 OR (card_id = ANY ($4) OR (board_id = ANY($5) AND card_id = $6) ) ) ' . $condition;
                     $boardIDS = array_diff($board_ids, $assigned_board_ids);
                     array_push($pg_params, '{' . implode(',', $boardIDS) . '}', '{' . implode(',', $org_ids) . '}', $authUser['id'], '{' . implode(',', $assigned_card_ids) . '}', '{' . implode(',', $assigned_board_ids) . '}', 0);
                 } else {
@@ -556,7 +559,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             $_metadata = $paging_data['_metadata'];
         }
         if (!empty($sql)) {
-            if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+            $result = pg_query_params($db_lnk, $sql, $pg_params);
+            if ($result) {
                 $data = array();
                 $board_lists = array();
                 while ($row = pg_fetch_row($result)) {
@@ -644,7 +648,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             $pg_params = array();
         }
         if (!empty($sql)) {
-            if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+            $result = pg_query_params($db_lnk, $sql, $pg_params);
+            if ($result) {
                 $data = array();
                 while ($row = pg_fetch_row($result)) {
                     $obj = json_decode($row[0], true);
@@ -663,7 +668,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
         $sql = 'SELECT row_to_json(d) FROM (SELECT * FROM users ul WHERE id = $1 ) as d ';
         array_push($pg_params, $r_resource_vars['users']);
         if (!empty($sql)) {
-            if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+            $result = pg_query_params($db_lnk, $sql, $pg_params);
+            if ($result) {
                 $data = array();
                 while ($row = pg_fetch_row($result)) {
                     $obj = json_decode($row[0], true);
@@ -764,7 +770,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             array_push($pg_params, '{' . $r_resource_vars['users'] . '}');
         }
         if (!empty($sql)) {
-            if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+            $result = pg_query_params($db_lnk, $sql, $pg_params);
+            if ($result) {
                 $data = array();
                 while ($row = pg_fetch_row($result)) {
                     $obj = json_decode($row[0], true);
@@ -844,7 +851,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             $_metadata = $paging_data['_metadata'];
         }
         if (!empty($sql)) {
-            if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+            $result = pg_query_params($db_lnk, $sql, $pg_params);
+            if ($result) {
                 $data = array();
                 $board_lists = array();
                 while ($row = pg_fetch_row($result)) {
@@ -1002,7 +1010,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             $sql = 'SELECT row_to_json(d) FROM (SELECT * FROM admin_boards_listing ul ' . $filter_condition . ' ORDER BY ' . $order_by . ' ' . $direction . ' limit ' . $_metadata['limit'] . ' offset ' . $_metadata['offset'] . ') as d ';
         }
         if (!empty($sql)) {
-            if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+            $result = pg_query_params($db_lnk, $sql, $pg_params);
+            if ($result) {
                 $data = array();
                 $board_lists = array();
                 while ($row = pg_fetch_row($result)) {
@@ -1209,7 +1218,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
                 }
                 array_push($pg_params, $r_resource_vars['boards']);
                 if (!empty($sql)) {
-                    if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+                    $result = pg_query_params($db_lnk, $sql, $pg_params);
+                    if ($result) {
                         $data = array();
                         while ($row = pg_fetch_row($result)) {
                             $obj = json_decode($row[0], true);
@@ -1322,15 +1332,12 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
                 while ($row = pg_fetch_assoc($s_result)) {
                     array_push($organization_ids, $row['organization_id']);
                 }
-                if (!empty($organization_ids)) {
-                    $sql.= ' WHERE id IN (' . implode(",", array_unique($organization_ids)) . ')';
-                } else {
-                    $sql.= ' WHERE user_id = ' . $authUser['id'];
-                }
+                $sql.= !empty($organization_ids) ? ' WHERE id IN (' . implode(",", array_unique($organization_ids)) . ')' : ' WHERE user_id = ' . $authUser['id'];
             }
             $sql.= ' ORDER BY id ASC) as d ';
             if (!empty($sql)) {
-                if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+                $result = pg_query_params($db_lnk, $sql, $pg_params);
+                if ($result) {
                     $data = array();
                     while ($row = pg_fetch_row($result)) {
                         $obj = json_decode($row[0], true);
@@ -1379,7 +1386,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             }
             $sql.= ' ORDER BY id ASC) as d ';
             if (!empty($sql)) {
-                if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+                $result = pg_query_params($db_lnk, $sql, $pg_params);
+                if ($result) {
                     $data = array();
                     while ($row = pg_fetch_row($result)) {
                         $obj = json_decode($row[0], true);
@@ -1420,7 +1428,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             $sql = 'SELECT row_to_json(d) FROM (SELECT * FROM organization_listing ul WHERE id = $1 ORDER BY id DESC ) as d';
             array_push($pg_params, $r_resource_vars['organizations']);
             if (!empty($sql)) {
-                if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+                $result = pg_query_params($db_lnk, $sql, $pg_params);
+                if ($result) {
                     $data = array();
                     while ($row = pg_fetch_row($result)) {
                         $obj = json_decode($row[0], true);
@@ -1569,7 +1578,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
                 $_metadata = $paging_data['_metadata'];
             }
             if (!empty($sql)) {
-                if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+                $result = pg_query_params($db_lnk, $sql, $pg_params);
+                if ($result) {
                     $data = array();
                     $board_lists = array();
                     while ($row = pg_fetch_row($result)) {
@@ -1650,7 +1660,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
         }
         $sql.= ' ORDER BY id DESC) as d ';
         if (!empty($sql)) {
-            if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+            $result = pg_query_params($db_lnk, $sql, $pg_params);
+            if ($result) {
                 $data = array();
                 while ($row = pg_fetch_row($result)) {
                     $obj = json_decode($row[0], true);
@@ -1671,7 +1682,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             array_push($pg_params, $authUser['id']);
         }
         $sql.= ' ORDER BY id DESC) as d ';
-        if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+        $result = pg_query_params($db_lnk, $sql, $pg_params);
+        if ($result) {
             $data = array();
             while ($row = pg_fetch_row($result)) {
                 $obj = json_decode($row[0], true);
@@ -1686,7 +1698,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
     case '/boards/search':
         $sql = 'SELECT row_to_json(d) FROM (SELECT id, name, background_color FROM boards ul WHERE name ILIKE $1 ORDER BY id DESC) as d';
         array_push($pg_params, '%' . $r_resource_filters['q'] . '%');
-        if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+        $result = pg_query_params($db_lnk, $sql, $pg_params);
+        if ($result) {
             $data = array();
             while ($row = pg_fetch_row($result)) {
                 $obj = json_decode($row[0], true);
@@ -1702,7 +1715,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
     case '/boards/?/cards/?':
         $sql = 'SELECT row_to_json(d) FROM (SELECT * FROM cards_listing cll WHERE id = $1) as d ';
         array_push($pg_params, $r_resource_vars['cards']);
-        if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+        $result = pg_query_params($db_lnk, $sql, $pg_params);
+        if ($result) {
             $data = array();
             while ($row = pg_fetch_row($result)) {
                 $obj = json_decode($row[0], true);
@@ -1759,7 +1773,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
                 $_metadata = $paging_data['_metadata'];
             }
         }
-        if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+        $result = pg_query_params($db_lnk, $sql, $pg_params);
+        if ($result) {
             $data = array();
             $board_lists = array();
             while ($row = pg_fetch_row($result)) {
@@ -1825,7 +1840,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
         while ($attachment = pg_fetch_assoc($attachments)) {
             $data['attachments'][] = $attachment;
         }
-        if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+        $result = pg_query_params($db_lnk, $sql, $pg_params);
+        if ($result) {
             $board_lists = array();
             while ($row = pg_fetch_row($result)) {
                 $obj = json_decode($row[0], true);
@@ -1900,7 +1916,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             $_metadata = $paging_data['_metadata'];
         }
         if (!empty($sql)) {
-            if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+            $result = pg_query_params($db_lnk, $sql, $pg_params);
+            if ($result) {
                 $data = array();
                 $board_lists = array();
                 while ($row = pg_fetch_row($result)) {
@@ -1963,7 +1980,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
     case '/boards/?/lists/?/cards/?/checklists':
         $sql = 'SELECT row_to_json(d) FROM (SELECT * FROM checklist_add_listing al WHERE board_id = $1) as d ';
         array_push($pg_params, $r_resource_vars['boards']);
-        if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+        $result = pg_query_params($db_lnk, $sql, $pg_params);
+        if ($result) {
             $data = array();
             while ($row = pg_fetch_row($result)) {
                 $obj = json_decode($row[0], true);
@@ -1978,7 +1996,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
     case '/boards/?/visibility':
         $sql = 'SELECT row_to_json(d) FROM (SELECT board_visibility FROM boards bl WHERE bl.id = $1) as d ';
         array_push($pg_params, $r_resource_vars['boards']);
-        if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+        $result = pg_query_params($db_lnk, $sql, $pg_params);
+        if ($result) {
             $data = array();
             while ($row = pg_fetch_row($result)) {
                 $obj = json_decode($row[0], true);
@@ -2014,7 +2033,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             $pg_params = array();
             echo json_encode($response);
         } else {
-            if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+            $result = pg_query_params($db_lnk, $sql, $pg_params);
+            if ($result) {
                 $data = array();
                 while ($row = pg_fetch_row($result)) {
                     $obj = json_decode($row[0], true);
@@ -2042,7 +2062,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             $pg_params = array();
             echo json_encode($response);
         } else {
-            if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+            $result = pg_query_params($db_lnk, $sql, $pg_params);
+            if ($result) {
                 $data = array();
                 while ($row = pg_fetch_row($result)) {
                     $obj = json_decode($row[0], true);
@@ -2240,7 +2261,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             array_push($pg_params, $condition_param);
         }
         $sql = 'SELECT row_to_json(d) FROM (SELECT * FROM oauth_clients c ' . $condition . ') as d ';
-        if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+        $result = pg_query_params($db_lnk, $sql, $pg_params);
+        if ($result) {
             $data = array();
             while ($row = pg_fetch_row($result)) {
                 $obj = json_decode($row[0], true);
@@ -2263,7 +2285,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             $sql.= $paging_data['sql'];
             $_metadata = $paging_data['_metadata'];
         }
-        if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+        $result = pg_query_params($db_lnk, $sql, $pg_params);
+        if ($result) {
             $data = array();
             while ($row = pg_fetch_row($result)) {
                 $obj = json_decode($row[0], true);
@@ -2296,7 +2319,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             $sql.= $paging_data['sql'];
             $_metadata = $paging_data['_metadata'];
         }
-        if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+        $result = pg_query_params($db_lnk, $sql, $pg_params);
+        if ($result) {
             $data = array();
             while ($row = pg_fetch_row($result)) {
                 $obj = json_decode($row[0], true);
@@ -8201,10 +8225,9 @@ function r_delete($r_resource_cmd, $r_resource_vars, $r_resource_filters)
         if (!empty($revisions['revisions'])) {
             $revision = unserialize($revisions['revisions']);
             $revisions_del['comment'] = $comment;
+            $revisions_del['old_value'] = '';
             if (isset($revision['new_value']['comment'])) {
                 $revisions_del['old_value'] = $revision['new_value']['comment'];
-            } else {
-                $revisions_del['old_value'] = '';
             }
             $revisions_del['new_value'] = '';
             $revisions_del = serialize($revisions_del);
