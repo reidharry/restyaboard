@@ -3019,7 +3019,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                     'success' => 'User authenticated successfully'
                 );
             }
-        } else {
+        }
+        if (empty($user)) {
             $last_login_ip_id = saveIp();
             $user_agent = !empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
             if (!empty($log_user)) {
