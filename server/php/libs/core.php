@@ -981,7 +981,8 @@ function pg_execute_insert($table_name, $r_post, $return_row = 1)
     }
     if (!empty($return_row)) {
         $row = pg_query_params($db_lnk, 'INSERT INTO ' . $table_name . ' (' . $fields . ') VALUES (' . $values . ') RETURNING *', $val_arr);
-    } else {
+    } 
+    if (empty($return_row)) {
         $row = pg_query_params($db_lnk, 'INSERT INTO ' . $table_name . ' (' . $fields . ') VALUES (' . $values . ')', $val_arr);
     }
     return $row;
@@ -1398,7 +1399,8 @@ function importTrelloBoard($board = array())
                                 $attachment['mimeType']
                             );
                             pg_fetch_assoc(pg_query_params($db_lnk, 'INSERT INTO card_attachments (created, modified, board_id, list_id, card_id, name, path, mimetype) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id', $qry_val_arr));
-                        } else {
+                        } 
+                        if (!$attachment['isUpload']) {
                             $qry_val_arr = array(
                                 $created,
                                 $modified,
@@ -1766,7 +1768,8 @@ function importKantreeBoard($jsonArr = array())
                 ob_end_flush(); // Strange behaviour, will not work
                 flush(); // Unless both are called !
                 ob_end_clean();
-            } else {
+            }
+            if (!strpos($server, 'apache')) {
                 echo json_encode($new_board);
                 fastcgi_finish_request();
             }
@@ -2102,7 +2105,8 @@ function importTaigaBoard($board = array())
             ob_end_flush(); // Strange behaviour, will not work
             flush(); // Unless both are called !
             ob_end_clean();
-        } else {
+        } 
+        if (!strpos($server, 'apache')) {
             echo json_encode($new_board);
             fastcgi_finish_request();
         }
@@ -2396,7 +2400,8 @@ function importWekanBoard($board = array())
             ob_end_flush(); // Strange behaviour, will not work
             flush(); // Unless both are called !
             ob_end_clean();
-        } else {
+        }
+        if (!strpos($server, 'apache')) {
             echo json_encode($new_board);
             fastcgi_finish_request();
         }
@@ -2424,6 +2429,10 @@ function importWekanBoard($board = array())
                 );
                 $username = $member['username'];
                 $userExist = executeQuery('SELECT * FROM users WHERE username = $1', $qry_val_arr);
+                if (!empty($userExist)) {
+                    $users[$wekan_user_id] = $userExist['id'];
+                    $user_data[$wekan_user_id] = $username;
+                }
                 if (!$userExist) {
                     $default_email_notification = 0;
                     if (DEFAULT_EMAIL_NOTIFICATION === 'Periodically') {
@@ -2456,9 +2465,6 @@ function importWekanBoard($board = array())
                     );
                     $user = pg_fetch_assoc(pg_query_params($db_lnk, 'INSERT INTO users (created, modified, role_id, username, email, password, is_active, is_email_confirmed, initials, full_name, is_send_newsletter, default_desktop_notification, is_list_notifications_enabled, is_card_notifications_enabled, is_card_members_notifications_enabled, is_card_labels_notifications_enabled, is_card_checklists_notifications_enabled, is_card_attachments_notifications_enabled) VALUES (now(), now(), 2, $1, $13, $2, true, true, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id', $qry_val_arr));
                     $users[$wekan_user_id] = $user['id'];
-                    $user_data[$wekan_user_id] = $username;
-                } else {
-                    $users[$wekan_user_id] = $userExist['id'];
                     $user_data[$wekan_user_id] = $username;
                 }
                 foreach ($board['members'] as $member) {
@@ -2741,12 +2747,11 @@ function splitAsanatasks($board, $task)
                     $tmp_list = $task['memberships'][0]['section'];
                 } else {
                     $board['todo_template'] = true;
+                    $tmp_list = $board['lists'][0];
                     if (!empty($task['completed']) && $task['completed'] == true) {
                         $tmp_list = $board['lists'][2];
                     } else if (!empty($task['assignee']) || !empty($task['due_on'])) {
                         $tmp_list = $board['lists'][1];
-                    } else {
-                        $tmp_list = $board['lists'][0];
                     }
                     $board['card_count'][$tmp_list['gid']] = 1;
                 }
@@ -2845,7 +2850,8 @@ function importAsanaBoard($jsonArr = array())
                 ob_end_flush(); // Strange behaviour, will not work
                 flush(); // Unless both are called !
                 ob_end_clean();
-            } else {
+            } 
+            if (!strpos($server, 'apache')) {
                 echo json_encode($new_board);
                 fastcgi_finish_request();
             }
@@ -3051,7 +3057,8 @@ function importTaskWarriorBoard($jsonArr = array())
                 ob_end_flush(); // Strange behaviour, will not work
                 flush(); // Unless both are called !
                 ob_end_clean();
-            } else {
+            } 
+            if (!strpos($server, 'apache')) {
                 echo json_encode($new_board);
                 fastcgi_finish_request();
             }
@@ -3195,7 +3202,8 @@ function importpipefyBoard($board = array())
             ob_end_flush(); // Strange behaviour, will not work
             flush(); // Unless both are called !
             ob_end_clean();
-        } else {
+        }
+        if (!strpos($server, 'apache')) {
             echo json_encode($new_board);
             fastcgi_finish_request();
         }
@@ -3516,7 +3524,8 @@ function importMondayBoards($path, $folder)
         ob_end_flush(); // Strange behaviour, will not work
         flush(); // Unless both are called !
         ob_end_clean();
-    } else {
+    } 
+    if (!strpos($server, 'apache')) {
         echo json_encode(["msg" => "Success"]);
         fastcgi_finish_request();
     }
@@ -4026,7 +4035,8 @@ function update_query($table_name, $id, $r_resource_cmd, $r_put, $comment = '', 
                                 if (getRevisiondifference($old_val, $new_val) !== false) {
                                     $diff[] = getRevisiondifference($old_val, $new_val);
                                 }
-                            } else {
+                            } 
+                            if ($activity_type != 'edit_comment') {
                                 $diff[] = nl2br(getRevisiondifference($old_val, $new_val));
                             }
                         }
@@ -4099,7 +4109,8 @@ function json_response($table_name, $r_resource_vars)
         $sql = 'SELECT row_to_json(d) FROM (SELECT * FROM cards_listing WHERE list_id = $1) as d ';
         array_push($pg_params, $r_resource_vars['lists']);
     }
-    if ($result = pg_query_params($db_lnk, $sql, $pg_params)) {
+    $result = pg_query_params($db_lnk, $sql, $pg_params);
+    if ($result) {
         $count = pg_num_rows($result);
         $i = 0;
         while ($row = pg_fetch_row($result)) {
@@ -4153,6 +4164,9 @@ function importMember($member, $new_board, $import_type)
     global $r_debug, $db_lnk;
     $users = array();
     $userExist = executeQuery('SELECT * FROM users WHERE username = $1', $qry_val_arr);
+    if (!empty($userExist)) {
+        $users[$member['id']] = $userExist['id'];
+    }
     if (!$userExist) {
         $default_email_notification = 0;
         if (DEFAULT_EMAIL_NOTIFICATION === 'Periodically') {
@@ -4197,8 +4211,6 @@ function importMember($member, $new_board, $import_type)
             );
             pg_query_params($db_lnk, 'UPDATE users SET profile_picture_path = $1 WHERE id = $2', $qry_val_arr);
         }
-    } else {
-        $users[$member['id']] = $userExist['id'];
     }
     $qry_val_arr = array(
         $users[$member['id']],
@@ -4406,6 +4418,7 @@ function sendMailNotification($notificationType)
                     $i++;
                 }
                 $is_mention_activity = $is_board_mention_activity = $is_card_mention_activity = 0;
+                $br = '<div style="line-height:40px;">&nbsp;</div>';
                 if ($activity['type'] == 'add_comment' || $activity['type'] == 'edit_comment') {
                     preg_match_all('/@(board*)/', $activity['comment'], $boardmatches);
                     if (!empty($boardmatches[1])) {
@@ -4433,8 +4446,8 @@ function sendMailNotification($notificationType)
                         $activity['comment'] = __l('##USER_NAME## commented to the card ##CARD_NAME## on ##BOARD_NAME##') . '<div style="margin:5px 0px 0px 43px"><div style="background-color: #ffffff;border: 1px solid #dddddd;border-radius: 4px;display: block;line-height: 1.42857;margin:7px 0;padding: 4px;transition: all 0.2s ease-in-out 0s;"><div style="padding:3px 0px 0px 0px;margin:0px">' . $activity['comment'] . '</div></div></div>';
                     }
                     $br = '<div style="line-height:20px;">&nbsp;</div>';
-                } else {
-                    $br = '<div style="line-height:40px;">&nbsp;</div>';
+                }  
+                if ($activity['type'] != 'add_comment' && $activity['type'] != 'edit_comment') {
                     if ($is_mention_activity) {
                         $mentioned_activity['comment'].= __l(' on ##BOARD_NAME##');
                     }

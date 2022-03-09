@@ -507,10 +507,10 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
                 // If Restricted board user
                 if (!empty($assigned_card_ids) || !empty($assigned_board_ids)) {
                     if (!empty($r_resource_filters['last_activity_id'])) {
-                        $condition = ' AND al.id > $7';
+                        $condition = ' AND al.id > $9';
                     }
-                    $sql = 'SELECT row_to_json(d) FROM (SELECT * FROM activities_listing al WHERE (board_id = ANY ( $1 ) OR organization_id  = ANY ( $2 ) OR revisions = $3 OR type = $8 OR type = $9 OR (card_id = ANY ($4) OR (board_id = ANY($5) AND card_id = $6) ) ) ' . $condition . ' ORDER BY id ' . $direction . ' LIMIT ' . PAGING_COUNT . ') as d';
-                    $c_sql = 'SELECT COUNT(*) FROM activities_listing al WHERE (board_id = ANY ( $1 ) OR organization_id  = ANY ( $2 ) OR revisions = $3 OR type = $8 OR type = $9 OR (card_id = ANY ($4) OR (board_id = ANY($5) AND card_id = $6) ) ) ' . $condition;
+                    $sql = 'SELECT row_to_json(d) FROM (SELECT * FROM activities_listing al WHERE (board_id = ANY ( $1 ) OR organization_id  = ANY ( $2 ) OR revisions = $3 OR type = $7 OR type = $8 OR (card_id = ANY ($4) OR (board_id = ANY($5) AND card_id = $6) ) ) ' . $condition . ' ORDER BY id ' . $direction . ' LIMIT ' . PAGING_COUNT . ') as d';
+                    $c_sql = 'SELECT COUNT(*) FROM activities_listing al WHERE (board_id = ANY ( $1 ) OR organization_id  = ANY ( $2 ) OR revisions = $3 OR type = $7 OR type = $8 OR (card_id = ANY ($4) OR (board_id = ANY($5) AND card_id = $6) ) ) ' . $condition;
                     $boardIDS = array_diff($board_ids, $assigned_board_ids);
                     array_push($pg_params, '{' . implode(',', $boardIDS) . '}', '{' . implode(',', $org_ids) . '}', $authUser['id'], '{' . implode(',', $assigned_card_ids) . '}', '{' . implode(',', $assigned_board_ids) . '}', 0);
                 } else {
@@ -1322,11 +1322,7 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
                 while ($row = pg_fetch_assoc($s_result)) {
                     array_push($organization_ids, $row['organization_id']);
                 }
-                if (!empty($organization_ids)) {
-                    $sql.= ' WHERE id IN (' . implode(",", array_unique($organization_ids)) . ')';
-                } else {
-                    $sql.= ' WHERE user_id = ' . $authUser['id'];
-                }
+                $sql.= !empty($organization_ids) ? ' WHERE id IN (' . implode(",", array_unique($organization_ids)) . ')' : ' WHERE user_id = ' . $authUser['id'];
             }
             $sql.= ' ORDER BY id ASC) as d ';
             if (!empty($sql)) {
@@ -8201,10 +8197,9 @@ function r_delete($r_resource_cmd, $r_resource_vars, $r_resource_filters)
         if (!empty($revisions['revisions'])) {
             $revision = unserialize($revisions['revisions']);
             $revisions_del['comment'] = $comment;
+            $revisions_del['old_value'] = '';
             if (isset($revision['new_value']['comment'])) {
                 $revisions_del['old_value'] = $revision['new_value']['comment'];
-            } else {
-                $revisions_del['old_value'] = '';
             }
             $revisions_del['new_value'] = '';
             $revisions_del = serialize($revisions_del);
