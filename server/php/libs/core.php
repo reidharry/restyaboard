@@ -58,7 +58,8 @@ function getToken($post)
         $server->addGrantType(new OAuth2\GrantType\RefreshToken($storage, $always_issue_new_refresh_token));
     } elseif (isset($_POST['grant_type']) && $_POST['grant_type'] == 'authorization_code') {
         $server->addGrantType(new OAuth2\GrantType\AuthorizationCode($storage));
-    } else {
+    }
+    if (!isset($_POST['grant_type']) && $_POST['grant_type'] != 'password' && $_POST['grant_type'] != 'refresh_token' && $_POST['grant_type'] != 'authorization_code') {
         $val_array = array(
             'client_secret' => OAUTH_CLIENT_SECRET
         );
@@ -106,10 +107,9 @@ function getCryptHash($str)
 {
     $salt = '';
     if (CRYPT_BLOWFISH) {
+        $algo_selector = '$2a$';
         if (version_compare(PHP_VERSION, '5.3.7') >= 0) { // http://www.php.net/security/crypt_blowfish.php
             $algo_selector = '$2y$';
-        } else {
-            $algo_selector = '$2a$';
         }
         $workload_factor = '12$'; // (around 300ms on Core i7 machine)
         $val_arr = array(
@@ -3446,9 +3446,10 @@ function importMondayBoards($path, $folder)
         if (!empty($board_filecount)) {
             foreach ($boardfiles as $key => $value) {
                 $board_file_name = basename($value);
+                $xlsx = SimpleXLSX::parse($value);
                 if (array_search($board_file_name, $sub_boards_names) > - 1) {
                     continue;
-                } else if ($xlsx = SimpleXLSX::parse($value)) {
+                } else if ($xlsx) {
                     $all_rows = array();
                     $data = $xlsx->rows();
                     $tmpboard = array();

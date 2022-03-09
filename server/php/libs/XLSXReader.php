@@ -714,7 +714,8 @@ class SimpleXLSX
      */
     public function getCell($worksheetIndex = 0, $cell = 'A1')
     {
-        if (($ws = $this->worksheet($worksheetIndex)) === false) {
+        $ws = $this->worksheet($worksheetIndex);
+        if ($ws === false) {
             return false;
         }
         $idx = is_array($cell) ? $cell : $this->getIndex((string)$cell);

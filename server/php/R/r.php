@@ -358,6 +358,9 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
         $val_array = array(
             true
         );
+        if (empty($sql)) {
+            echo json_encode($response);
+        }
         if (!empty($sql)) {
             $result = pg_query_params($db_lnk, $sql, $pg_params);
             if ($result) {
@@ -374,11 +377,10 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
                     $data['_metadata'] = $_metadata;
                 }
                 echo json_encode($data);
-            } else {
+            }
+            if (!$result) {
                 $r_debug.= __LINE__ . ': ' . pg_last_error($db_lnk) . '\n';
             }
-        } else {
-            echo json_encode($response);
         }
         break;
 
@@ -596,7 +598,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
                     $obj = ActivityHandler::getActivitiesObj($obj);
                     if (!empty($_metadata)) {
                         $data['data'][] = $obj;
-                    } else {
+                    }
+                    if (empty($_metadata)) {
                         $data[] = $obj;
                     }
                 }
@@ -604,7 +607,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
                     $data['_metadata'] = $_metadata;
                 }
                 echo json_encode($data);
-            } else {
+            }
+            if (!$result) {
                 $r_debug.= __LINE__ . ': ' . pg_last_error($db_lnk) . '\n';
             }
         }
@@ -638,11 +642,7 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
         } else {
             $sql = 'SELECT row_to_json(d) FROM (SELECT u.id, u.username, u.profile_picture_path,u.initials, u.full_name FROM users u WHERE  u.is_active = true AND u.is_email_confirmed = true AND ';
         }
-        if (empty($pg_params)) {
-            $sql.= '(LOWER(u.username) LIKE LOWER($1) OR LOWER(u.email) LIKE LOWER($2))) as d ';
-        } else {
-            $sql.= '(LOWER(u.username) LIKE LOWER($2) OR LOWER(u.email) LIKE LOWER($3))) as d ';
-        }
+        $sql.= empty($pg_params) ? '(LOWER(u.username) LIKE LOWER($1) OR LOWER(u.email) LIKE LOWER($2))) as d ' : '(LOWER(u.username) LIKE LOWER($2) OR LOWER(u.email) LIKE LOWER($3))) as d ';
         array_push($pg_params, '%' . $r_resource_filters['q'] . '%', '%' . $r_resource_filters['q'] . '%');
         if (empty($r_resource_filters['q'])) {
             $sql = false;
@@ -658,7 +658,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
                     $data[] = $obj;
                 }
                 echo json_encode($data);
-            } else {
+            }
+            if (!$result) {
                 $r_debug.= __LINE__ . ': ' . pg_last_error($db_lnk) . '\n';
             }
         } else {
@@ -1347,7 +1348,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
                         $data[] = $obj;
                     }
                     echo json_encode($data);
-                } else {
+                }
+                if (!$result) {
                     $r_debug.= __LINE__ . ': ' . pg_last_error($db_lnk) . '\n';
                 }
             }
@@ -1559,19 +1561,28 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
                     while ($row = pg_fetch_assoc($cardsIDS)) {
                         $assigned_card_ids[] = $row['id'];
                     }
+                    $cardFilter = 'al.card_id = $2';
+                    if ($i === 3) {
+                        $cardFilter = 'al.card_id = $3';
+                    }
+                    $sql = 'SELECT row_to_json(d) FROM (SELECT al.*, u.username, u.profile_picture_path, u.initials, u.full_name, c.description, c.name as card_name FROM activities_listing al LEFT JOIN users u ON al.user_id = u.id LEFT JOIN cards c on al.card_id = c.id WHERE (al.board_id = $1 AND ' . $cardFilter . ') ' . $condition . ' ' . $order . ' LIMIT ' . $limit . ' ' . $construct_offset . ') as d ';
+                    if (empty($r_resource_filters['from']) || (!empty($r_resource_filters['from']) && $r_resource_filters['from'] != 'app')) {
+                        $c_sql = 'SELECT COUNT(*) FROM activities_listing al WHERE al.board_id = $1 AND ' . $cardFilter . $condition;
+                    }
+                    if (empty($assigned_card_ids)) {
+                        array_push($pg_params, 0);
+                    }
                     if (!empty($assigned_card_ids)) {
-                        $sql = 'SELECT row_to_json(d) FROM (SELECT al.*, u.username, u.profile_picture_path, u.initials, u.full_name, c.description, c.name as card_name FROM activities_listing al LEFT JOIN users u ON al.user_id = u.id LEFT JOIN cards c on al.card_id = c.id WHERE al.board_id = $1 AND (al.card_id = ANY ($3) OR al.revisions = $2 )' . $condition . ' ' . $order . ' LIMIT ' . $limit . ' ' . $construct_offset . ') as d ';
+                        $cardFilter = 'al.card_id = ANY ($2)';
+                        if ($i === 3) {
+                            $cardFilter = 'al.card_id = ANY ($3)';
+                        }
+                        $sql = 'SELECT row_to_json(d) FROM (SELECT al.*, u.username, u.profile_picture_path, u.initials, u.full_name, c.description, c.name as card_name FROM activities_listing al LEFT JOIN users u ON al.user_id = u.id LEFT JOIN cards c on al.card_id = c.id WHERE al.board_id = $1 AND (' . $cardFilter . ')' . $condition . ' ' . $order . ' LIMIT ' . $limit . ' ' . $construct_offset . ') as d ';
                         if (empty($r_resource_filters['from']) || (!empty($r_resource_filters['from']) && $r_resource_filters['from'] != 'app')) {
-                            $c_sql = 'SELECT COUNT(*) FROM activities_listing al WHERE (al.board_id = $1 AND al.card_id = ANY ($3)) OR al.revisions = $2 ' . $condition;
+                            $c_sql = 'SELECT COUNT(*) FROM activities_listing al WHERE (al.board_id = $1 AND ' . $cardFilter . ') ' . $condition;
                         }
                         array_push($assigned_card_ids, 0);
-                        array_push($pg_params, $authUser['id'], '{' . implode(',', $assigned_card_ids) . '}');
-                    } else {
-                        $sql = 'SELECT row_to_json(d) FROM (SELECT al.*, u.username, u.profile_picture_path, u.initials, u.full_name, c.description, c.name as card_name FROM activities_listing al LEFT JOIN users u ON al.user_id = u.id LEFT JOIN cards c on al.card_id = c.id WHERE (al.board_id = $1 AND al.card_id = $2) ' . $condition . ' ' . $order . ' LIMIT ' . $limit . ' ' . $construct_offset . ') as d ';
-                        if (empty($r_resource_filters['from']) || (!empty($r_resource_filters['from']) && $r_resource_filters['from'] != 'app')) {
-                            $c_sql = 'SELECT COUNT(*) FROM activities_listing al WHERE al.board_id = $1 AND card_id = $2 ' . $condition;
-                        }
-                        array_push($pg_params, 0);
+                        array_push($pg_params, '{' . implode(',', $assigned_card_ids) . '}');
                     }
                 }
             }
@@ -2213,7 +2224,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             $fields = $data['settings_from_db'];
             if ($data['id'] !== 'r_multiple_ldap_login') {
                 $result = pg_query_params($db_lnk, 'SELECT * FROM settings WHERE name IN (' . $fields . ') ORDER BY "order" ASC', array());
-            } else {
+            }
+            if ($data['id'] === 'r_multiple_ldap_login') {
                 $result = pg_query_params($db_lnk, 'SELECT * FROM settings WHERE name LIKE $1 ORDER BY "order" ASC', array(
                     '%R_MLDAP%'
                 ));
@@ -3007,7 +3019,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                     'success' => 'User authenticated successfully'
                 );
             }
-        } else {
+        }
+        if (empty($user)) {
             $last_login_ip_id = saveIp();
             $user_agent = !empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
             if (!empty($log_user)) {
@@ -3022,15 +3035,14 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
             // login failed error logged
             $login_fail_string = date('Y-m-d H:i:s') . '|' . $_SERVER['REMOTE_ADDR'] . '|' . $r_post['email'] . '|' . $user_agent;
             error_log($login_fail_string . PHP_EOL, 3, CACHE_PATH . DS . 'user_logins_failed.log');
+            $response = array(
+                'code' => 'email',
+                'error' => 'Sorry, login failed. Either your username or password are incorrect or admin deactivated your account.'
+            );
             if (!empty($ldap_error)) {
                 $response = array(
                     'code' => 'LDAP',
                     'error' => $ldap_error
-                );
-            } else {
-                $response = array(
-                    'code' => 'email',
-                    'error' => 'Sorry, login failed. Either your username or password are incorrect or admin deactivated your account.'
                 );
             }
         }
