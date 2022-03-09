@@ -3528,7 +3528,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                 if ($_FILES['board_import_pipefy']['type'] === 'text/csv') {
                     $all_rows = array();
                     $imported_board = array();
-                    if (($handle = fopen($_FILES['board_import_pipefy']['tmp_name'], "r")) !== false) {
+                    $handle = fopen($_FILES['board_import_pipefy']['tmp_name'], "r");
+                    if ($handle !== false) {
                         $row = 1;
                         while (($data = fgetcsv($handle, 40000, ",")) !== false) {
                             if ($row > 1) {
