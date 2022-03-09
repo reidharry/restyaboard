@@ -1872,7 +1872,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
         $data = array();
         $fields = !empty($r_resource_filters['fields']) ? $r_resource_filters['fields'] : '*';
         $sql = "SELECT row_to_json(d) FROM (SELECT " . $fields . " FROM cards_listing cll WHERE custom_fields LIKE '%" . $r_resource_filters['custom_field'] . "%' ORDER BY position asc) as d ";
-        if ($result = pg_query_params($db_lnk, $sql, array())) {
+        $result = pg_query_params($db_lnk, $sql, array());
+        if ($result) {
             $board_lists = array();
             while ($row = pg_fetch_row($result)) {
                 $obj = json_decode($row[0], true);
@@ -1968,7 +1969,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
 
     case '/timezones':
         $sql = 'SELECT row_to_json(d) FROM (SELECT * FROM timezones order by utc_offset::int) as d ';
-        if ($result = pg_query_params($db_lnk, $sql, array())) {
+        $result = pg_query_params($db_lnk, $sql, array());
+        if ($result) {
             $data = array();
             while ($row = pg_fetch_row($result)) {
                 $obj = json_decode($row[0], true);
@@ -5194,7 +5196,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
             $subscribe = pg_fetch_assoc($s_result);
             $response['id'] = $subscribe['id'];
             if ($sql && ($sql !== true) && !empty($json) && !empty($response['id'])) {
-                if ($result = pg_query_params($db_lnk, $sql, array())) {
+                $result = pg_query_params($db_lnk, $sql, array());
+                if ($result) {
                     $count = pg_num_rows($result);
                     $i = 0;
                     while ($row = pg_fetch_row($result)) {
