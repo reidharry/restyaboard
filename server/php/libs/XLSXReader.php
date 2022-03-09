@@ -290,7 +290,8 @@ class SimpleXLSX
                     if ((int)$workbook->workbookPr['date1904'] === 1) {
                         $this->date1904 = 1;
                     }
-                    if ($workbookRelations = $this->getEntryXML(dirname($rel_target) . '/_rels/workbook.xml.rels')) {
+                    $workbookRelations = $this->getEntryXML(dirname($rel_target) . '/_rels/workbook.xml.rels');
+                    if ($workbookRelations) {
                         // Loop relations for workbook and extract sheets...
                         foreach ($workbookRelations->Relationship as $workbookRelation) {
                             $wrel_type = basename(trim((string)$workbookRelation['Type']));
