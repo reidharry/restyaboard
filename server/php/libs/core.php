@@ -3378,7 +3378,8 @@ function importMondayBoards($path, $folder)
         $team_filecount = count($teamfiles);
         if (!empty($team_filecount)) {
             foreach ($teamfiles as $key => $value) {
-                if ($xlsx = SimpleXLSX::parse($value)) {
+                $xlsx = SimpleXLSX::parse($value);
+                if ($xlsx) {
                     $all_rows = array();
                     $data = $xlsx->rows();
                     $row = 0;
