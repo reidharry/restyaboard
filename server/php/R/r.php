@@ -243,9 +243,10 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
                     if (is_plugin_enabled('r_groups')) {
                         $group_sql = 'SELECT row_to_json(d) FROM (SELECT * FROM groups_users Where user_id = $1 ORDER BY id DESC) as d ';
                         $obj['groups'] = null;
-                        if ($group_result = pg_query_params($db_lnk, $group_sql, array(
+                        $group_result = pg_query_params($db_lnk, $group_sql, array(
                             $obj['id']
-                        ))) {
+                        ));
+                        if ($group_result) {
                             while ($group = pg_fetch_row($group_result)) {
                                 $group = json_decode($group[0], true);
                                 $obj['groups'][] = $group;
@@ -327,7 +328,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             $filter_condition = 'WHERE ';
             if ($r_resource_filters['filter'] == 'inactive') {
                 $filter_condition.= 'is_active = 0';
-            } else {
+            }
+            if ($r_resource_filters['filter'] != 'inactive') {
                 $filter_condition.= 'is_active = 1';
             }
         } else if (!empty($r_resource_filters['search'])) {
@@ -1744,7 +1746,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
         $data = array();
         array_push($pg_params, $r_resource_vars['boards']);
         $sql = 'SELECT DISTINCT label_id, MAX(name) FROM  cards_labels_listing cll WHERE board_id = $1 GROUP BY label_id ORDER BY MAX(name) ASC';
-        if ($res = pg_query_params($db_lnk, $sql, $pg_params)) {
+        $res = pg_query_params($db_lnk, $sql, $pg_params);
+        if ($res) {
             while ($row = pg_fetch_assoc($res)) {
                 $val_arr = array(
                     $row['label_id']
@@ -1869,7 +1872,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
         $data = array();
         $fields = !empty($r_resource_filters['fields']) ? $r_resource_filters['fields'] : '*';
         $sql = "SELECT row_to_json(d) FROM (SELECT " . $fields . " FROM cards_listing cll WHERE custom_fields LIKE '%" . $r_resource_filters['custom_field'] . "%' ORDER BY position asc) as d ";
-        if ($result = pg_query_params($db_lnk, $sql, array())) {
+        $result = pg_query_params($db_lnk, $sql, array());
+        if ($result) {
             $board_lists = array();
             while ($row = pg_fetch_row($result)) {
                 $obj = json_decode($row[0], true);
@@ -1965,7 +1969,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
 
     case '/timezones':
         $sql = 'SELECT row_to_json(d) FROM (SELECT * FROM timezones order by utc_offset::int) as d ';
-        if ($result = pg_query_params($db_lnk, $sql, array())) {
+        $result = pg_query_params($db_lnk, $sql, array());
+        if ($result) {
             $data = array();
             while ($row = pg_fetch_row($result)) {
                 $obj = json_decode($row[0], true);
@@ -3523,7 +3528,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                 if ($_FILES['board_import_pipefy']['type'] === 'text/csv') {
                     $all_rows = array();
                     $imported_board = array();
-                    if (($handle = fopen($_FILES['board_import_pipefy']['tmp_name'], "r")) !== false) {
+                    $handle = fopen($_FILES['board_import_pipefy']['tmp_name'], "r");
+                    if ($handle !== false) {
                         $row = 1;
                         while (($data = fgetcsv($handle, 40000, ",")) !== false) {
                             if ($row > 1) {
@@ -5191,7 +5197,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
             $subscribe = pg_fetch_assoc($s_result);
             $response['id'] = $subscribe['id'];
             if ($sql && ($sql !== true) && !empty($json) && !empty($response['id'])) {
-                if ($result = pg_query_params($db_lnk, $sql, array())) {
+                $result = pg_query_params($db_lnk, $sql, array());
+                if ($result) {
                     $count = pg_num_rows($result);
                     $i = 0;
                     while ($row = pg_fetch_row($result)) {
