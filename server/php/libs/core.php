@@ -442,7 +442,7 @@ function checkAclLinks($r_request_method = 'GET', $r_resource_cmd = '/users', $r
             $r_resource_vars['boards']
         );
         $board = executeQuery('SELECT board_visibility FROM boards WHERE id = $1', $qry_val_arr);
-        if ($board['board_visibility'] == 2 && $r_request_method == 'GET') {
+        if (!empty($board) && $board['board_visibility'] == 2 && $r_request_method == 'GET') {
             return true;
         }
     }
@@ -451,7 +451,7 @@ function checkAclLinks($r_request_method = 'GET', $r_resource_cmd = '/users', $r
             $r_resource_vars['organizations']
         );
         $organizations = executeQuery('SELECT organization_visibility FROM organizations WHERE id = $1', $qry_val_arr);
-        if ($organizations['organization_visibility'] == 1 && $r_request_method == 'GET') {
+        if (!empty($organizations) && $organizations['organization_visibility'] == 1 && $r_request_method == 'GET') {
             return true;
         }
     }

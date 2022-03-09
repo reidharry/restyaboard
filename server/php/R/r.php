@@ -1295,7 +1295,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
                 // header($_SERVER['SERVER_PROTOCOL'] . ' 401 Unauthorized', true, 401);
                 
             }
-        } else {
+        }
+        if (empty($check_board)) {
             $response['error']['type'] = 'board';
             $response['error']['message'] = 'Bad Request';
             header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400);
@@ -3484,7 +3485,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                 } else {
                     $response['error'] = 'Invalid file format. Upload json file';
                 }
-            } else {
+            }
+            if ($_FILES['board_import_taiga']['error'] != 0) {
                 $response['error'] = 'Unable to import. please try again.';
             }
         } elseif (!empty($_FILES['board_import_asana'])) {
@@ -3531,7 +3533,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                     $handle = fopen($_FILES['board_import_pipefy']['tmp_name'], "r");
                     if ($handle !== false) {
                         $row = 1;
-                        while (($data = fgetcsv($handle, 40000, ",")) !== false) {
+                        $data = fgetcsv($handle, 40000, ",");
+                        while ($data !== false) {
                             if ($row > 1) {
                                 $arrResult = array();
                                 foreach ($data as $key => $value) {
@@ -3546,12 +3549,14 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                         if (!empty($imported_board)) {
                             $board = importpipefyBoard($imported_board);
                             $response['id'] = $board['id'];
-                        } else {
+                        }
+                        if (empty($imported_board)) {
                             $response['error'] = 'Invalid file format. Upload CSV file';
                         }
                     }
                     fclose($handle);
-                } else {
+                }
+                if ($_FILES['board_import_pipefy']['type'] !== 'text/csv') {
                     $response['error'] = 'Invalid file format. Upload CSV file';
                 }
             } else {
@@ -4002,7 +4007,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                                 $list_fields.= ', ' . $key;
                                 if ($value === false) {
                                     array_push($list_values, 'false');
-                                } else {
+                                }
+                                if ($value !== false) {
                                     array_push($list_values, $value);
                                 }
                             }
@@ -4047,7 +4053,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                                         pg_query_params($db_lnk, 'INSERT INTO list_subscribers (' . $lists_subscriber_fields . ') VALUES (' . $lists_subscriber_val . ')', $lists_subscriber_values);
                                     }
                                 }
-                            } else {
+                            }
+                            if (!$keepusers) {
                                 //Copy list subscribers
                                 $qry_val_arr = array(
                                     $list_id,
@@ -4337,7 +4344,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                                                                 array_push($cards_subscriber_values, 'false');
                                                             } else if ($value === null) {
                                                                 array_push($cards_subscriber_values, null);
-                                                            } else {
+                                                            }
+                                                            if ($value !== false && $value !== null) {
                                                                 array_push($cards_subscriber_values, $value);
                                                             }
                                                         }
@@ -4503,7 +4511,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                 }
                 unset($r_post['name']);
                 $response['activity'] = update_query('boards', $r_resource_vars['boards'], $r_resource_cmd, $r_post, $comment, $activity_type, $foreign_ids);
-            } else {
+            }
+            if (!in_array($file_ext, $allowed_ext)) {
                 $response['error'] = 'File extension not supported. It supports only jpg, png, bmp and gif.';
             }
         }
@@ -4718,7 +4727,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                 $r_post['user_id']
             );
             pg_query_params($db_lnk, 'UPDATE list_subscribers SET is_subscribed = $1 WHERE list_id = $2 and user_id = $3', $qry_val_arr);
-        } else {
+        }
+        if (empty($check_subscribed)) {
             $r_post['list_id'] = $r_resource_vars['lists'];
             $sql = true;
         }
@@ -5525,10 +5535,9 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                         $path = $save_path . DS . $filename['file_name'];
                         $mimetype = explode('.', $r_post['name']);
                         $mimetypeStore = "";
+                        $mimetypeStore = "application/" + $mimetype[count($mimetype) - 1];
                         if ($mimetype[count($mimetype) - 1] == "jpg" || $mimetype[count($mimetype) - 1] == "gif" || $mimetype[count($mimetype) - 1] == "jpeg" || $mimetype[count($mimetype) - 1] == "png") {
                             $mimetypeStore = "image/" + $mimetype[count($mimetype) - 1];
-                        } else {
-                            $mimetypeStore = "application/" + $mimetype[count($mimetype) - 1];
                         }
                         $qry_val_arr = array(
                             $r_post['card_id'],
@@ -5539,7 +5548,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                             $mimetypeStore,
                             NULL
                         );
-                    } else {
+                    }
+                    if (empty($image_type_check)) {
                         $qry_val_arr = array(
                             $r_post['card_id'],
                             $r_post['name'],
@@ -5638,7 +5648,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
             foreach ($label_names as $label_name) {
                 if (in_array($label_name, $previous_cards_labels)) {
                     $oldlabel[] = $label_name;
-                } else {
+                }
+                if (!in_array($label_name, $previous_cards_labels)) {
                     $newlabel[] = $label_name;
                 }
                 $names.= $label_name . ', ';
@@ -6080,6 +6091,9 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                             );
                             $custom_fields = pg_query_params($db_lnk, 'SELECT * FROM custom_fields WHERE board_id IS NULL or board_id = $1', $qry_val_arr);
                             while ($custom_field = pg_fetch_assoc($custom_fields)) {
+                                if (!empty($custom_field) && empty($custom_field['board_id'])) {
+                                    $customFields[$custom_field['id']] = $custom_field['id'];
+                                }
                                 if (!empty($custom_field['board_id'])) {
                                     $qry_val_arr = array(
                                         $r_post['board_id'],
@@ -6102,7 +6116,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                                         $result = pg_execute_insert('custom_fields', $data);
                                         $row = pg_fetch_assoc($result);
                                         $customFields[$custom_field['id']] = (int)($row['id']);
-                                    } else {
+                                    }
+                                    if (!empty($customField)) {
                                         $qry_val_arr = array(
                                             $r_resource_vars['boards'],
                                             $custom_field['name']
@@ -6122,8 +6137,6 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                                         }
                                         $customFields[$custom_field['id']] = $customField['id'];
                                     }
-                                } else {
-                                    $customFields[$custom_field['id']] = $custom_field['id'];
                                 }
                             }
                             if (!empty($customFields)) {
@@ -6476,7 +6489,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                 $response['status']['code'] = 200;
                 echo json_encode($response);
                 break;
-            } else {
+            }
+            if ($get_saml_idp_meta_data_responces['status']['code'] != '200' || empty($get_saml_idp_meta_data_responces['metadata'])) {
                 $response['status']['code'] = 401;
                 $response['error']['type'] = 'IdP metadata not generated';
                 $response['error']['content'] = 'Please check your IdP metadata XML';
@@ -6581,7 +6595,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                         'R_SAML_META_DATA'
                     );
                     pg_query_params($db_lnk, "UPDATE settings SET value = $1 WHERE name = $2", $saml_qry_val_arr);
-                } else {
+                }
+                if ($get_saml_meta_data_responces['status']['code'] != '200') {
                     $response['error']['type'] = 'Metadata Error';
                     $response['error']['content'] = 'Metadata Not Updated';
                     echo json_encode($response);
@@ -6589,7 +6604,8 @@ function r_post($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_post)
                 }
             }
             $response['success'] = 'App updated successfully';
-        } else {
+        }
+        if (!is_writable(APP_PATH . '/client/apps/' . $folder_name . '/app.json')) {
             $response['error']['type'] = 'File permission';
             $response['error']['content'] = '/client/apps/ ' . $folder_name . ' / app.json';
         }
@@ -7043,10 +7059,9 @@ function r_put($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_put)
                 if (!empty($boardCustomFields['board_custom_fields'])) {
                     $boardCustomFields = json_decode($boardCustomFields['board_custom_fields'], true);
                     foreach ($boardCustomFields as $key => $boardValue) {
+                        $custom_fields_array[$key] = $boardValue;
                         if (array_key_exists($key, $custom_fields_array)) {
                             $custom_fields_array[$key] = $custom_fields_array[$key];
-                        } else {
-                            $custom_fields_array[$key] = $boardValue;
                         }
                     }
                 }
@@ -7574,6 +7589,9 @@ function r_put($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_put)
                 );
                 $custom_fields = pg_query_params($db_lnk, 'SELECT * FROM custom_fields WHERE board_id IS NULL or board_id = $1', $qry_val_arr);
                 while ($custom_field = pg_fetch_assoc($custom_fields)) {
+                    if (!empty($custom_field) && empty($custom_field['board_id'])) {
+                        $customFields[$custom_field['id']] = $custom_field['id'];
+                    }
                     if (!empty($custom_field['board_id'])) {
                         $qry_val_arr = array(
                             $r_put['board_id'],
@@ -7616,8 +7634,6 @@ function r_put($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_put)
                             }
                             $customFields[$custom_field['id']] = $customField['id'];
                         }
-                    } else {
-                        $customFields[$custom_field['id']] = $custom_field['id'];
                     }
                 }
                 if (!empty($customFields)) {
@@ -7654,10 +7670,9 @@ function r_put($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_put)
             $comment = '##USER_NAME## added card description in the card ##CARD_LINK## - ##DESCRIPTION##';
             $activity_type = 'add_card_desc';
         } else if (isset($previous_value) && isset($r_put['description']) && $r_put['description'] != $previous_value['description']) {
+            $comment = '##USER_NAME## updated description on the card ##CARD_LINK##';
             if (empty($r_put['description'])) {
                 $comment = '##USER_NAME## removed description from the card ##CARD_LINK##';
-            } else {
-                $comment = '##USER_NAME## updated description on the card ##CARD_LINK##';
             }
             $activity_type = 'edit_card_desc';
         }
@@ -7755,7 +7770,7 @@ function r_put($r_resource_cmd, $r_resource_vars, $r_resource_filters, $r_put)
             }
         } else if (isset($r_put['is_completed']) && $r_put['is_completed'] == 'false') {
             $comment = '##USER_NAME## updated ' . $prev_value['name'] . ' as incomplete on the card ##CARD_LINK##';
-        } else {
+        } else if (!empty($r_put['name'])) {
             $comment = '##USER_NAME## updated item name of ' . $r_put['name'] . ' in the card ##CARD_LINK##';
         }
         $response = update_query($table_name, $id, $r_resource_cmd, $r_put, $comment, $activity_type, $foreign_ids);
