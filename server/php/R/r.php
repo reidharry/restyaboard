@@ -2075,7 +2075,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             $response = array();
             $pg_params = array();
             echo json_encode($response);
-        } else {
+        }
+        if (!empty($r_resource_filters['q'])) {
             $result = pg_query_params($db_lnk, $sql, $pg_params);
             if ($result) {
                 $data = array();
@@ -2105,7 +2106,8 @@ function r_get($r_resource_cmd, $r_resource_vars, $r_resource_filters)
             $response = array();
             $pg_params = array();
             echo json_encode($response);
-        } else {
+        }
+        if (!empty($r_resource_filters['q'])) {
             $result = pg_query_params($db_lnk, $sql, $pg_params);
             if ($result) {
                 $data = array();
