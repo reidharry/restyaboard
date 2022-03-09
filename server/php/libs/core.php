@@ -3409,7 +3409,8 @@ function importMondayBoards($path, $folder)
         $updates_filecount = count($updatesfiles);
         if (!empty($updates_filecount)) {
             foreach ($updatesfiles as $key => $value) {
-                if ($xlsx = SimpleXLSX::parse($value)) {
+                $xlsx = SimpleXLSX::parse($value);
+                if ($xlsx) {
                     $all_rows = array();
                     $data = $xlsx->rows();
                     $row = 0;
