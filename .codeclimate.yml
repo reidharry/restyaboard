@@ -9,6 +9,8 @@ checks:
   file-lines:
     config:
       threshold: 10000
+  similar-code:
+    enabled: false
   identical-code:
     enabled: false
   method-complexity:
