@@ -68,6 +68,8 @@ plugins:
         enabled: false
       CleanCode/ElseExpression:
         enabled: false
+      CleanCode/IfStatementAssignment:
+        enabled: false
       CleanCode/MissingImport:
         enabled: false
       CleanCode/StaticAccess:
