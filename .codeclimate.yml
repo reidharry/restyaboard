@@ -62,7 +62,7 @@ plugins:
       XXX:
         enabled: false
   phpmd:
-    enabled: true
+    enabled: false
     checks:
       CleanCode/BooleanArgumentFlag:
         enabled: false
