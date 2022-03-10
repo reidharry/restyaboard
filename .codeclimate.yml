@@ -1,5 +1,7 @@
 version: "2"
 checks:
+  complex-logic:
+    enabled: false
   file-lines:
     config:
       threshold: 10000
@@ -7,7 +9,15 @@ checks:
     enabled: true
     config:
       threshold: 10000
+  method-count:
+    enabled: true
+    config:
+      threshold: 1000
   method-lines:
+    config:
+      threshold: 10000
+  nested-control-flow:
+    enabled: true
     config:
       threshold: 10000
 plugins:
