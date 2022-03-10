@@ -66,6 +66,8 @@ plugins:
     checks:
       CleanCode/BooleanArgumentFlag:
         enabled: false
+      CleanCode/ElseExpression:
+        enabled: false
       CleanCode/MissingImport:
         enabled: false
       CleanCode/StaticAccess:
