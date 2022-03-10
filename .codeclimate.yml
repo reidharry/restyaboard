@@ -3,6 +3,10 @@ checks:
   file-lines:
     config:
       threshold: 10000
+  method-complexity:
+    enabled: true
+    config:
+      threshold: 10000
   method-lines:
     config:
       threshold: 10000
