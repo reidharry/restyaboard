@@ -1,10 +1,16 @@
 version: "2"
 checks:
+  argument-count:
+    enabled: true
+    config:
+      threshold: 10
   complex-logic:
     enabled: false
   file-lines:
     config:
       threshold: 10000
+  identical-code:
+    enabled: false
   method-complexity:
     enabled: true
     config:
@@ -20,6 +26,10 @@ checks:
     enabled: true
     config:
       threshold: 10000
+  return-statements:
+    enabled: true
+    config:
+      threshold: 100
 plugins:
   csslint:
     enabled: true
