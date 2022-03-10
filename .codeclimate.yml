@@ -44,6 +44,8 @@ plugins:
         enabled: false
       compatible-vendor-prefixes:
         enabled: false
+      display-property-grouping:
+        enabled: false
       duplicate-background-images:
         enabled: false
       duplicate-properties:
@@ -63,6 +65,8 @@ plugins:
       outline-none:
         enabled: false
       overqualified-elements:
+        enabled: false
+      qualified-headings:
         enabled: false
       universal-selector:
         enabled: false
